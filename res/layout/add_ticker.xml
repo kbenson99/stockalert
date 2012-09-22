@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+
+    android:orientation="vertical"
+    android:paddingBottom="15.0sp"
+    android:paddingLeft="12.0sp"
+    android:paddingRight="12.0sp"
+    android:paddingTop="10.0sp" >
+
+    <Button
+        android:id="@+id/add_ticker_btn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingLeft="10.0sp"
+        android:paddingRight="10.0sp"
+        android:text="@string/AddTickerBtn"
+        android:textSize="16.0sp" />
+
+</LinearLayout>

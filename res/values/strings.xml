@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, JSONParseactivity!</string>
+    <string name="app_name">Finance Alert</string>
+    <string name="Alerts_Page">Alerts</string>
+    <string name="Add_Page">Add Stock</string>
+    <string name="Edit_Page">Edit Stock</string>
+    
+    
+    <string name="JsonUrl">http://maps.googleapis.com/maps/api/geocode/json</string>
+    <string name="QuoteUrl">http://query.yahooapis.com/v1/public/yql?q=</string>
+    <string name="QuoteResource">/info?infotype=infoquoteall</string>
+    
+    <string name="AddTickerBtn">Add</string>
+    <string name="EditTickerBtn">Edit</string>
+    <string name="CancelTickerBtn">Cancel</string>
+
+    <string name="AddTicker">Add Ticker</string>
+    <string name="RefreshAlerts">Refresh</string>
+    <string name="Preferences">Preferences</string>
+    <string name="ExportAlerts">Export Alerts</string>
+    <string name="ImportAlerts">Import Alerts</string>
+    
+    <string name="EditStockKey">stock</string>
+    
+    <string name="Delete">Delete</string>
+    <string name="Edit">Edit</string>
+    
+    <string name="UnknownEchange">unknown</string>
+    
+    <item format="integer" type="integer" name="servicePause">300</item>
+    <item format="integer" type="integer" name="dailyStart">9</item>
+    <item format="integer" type="integer" name="dailyStop">17</item>    
+        
+   
+    <item format="string" type="bool" name="verbose">false</item>
+    <string name="queryBtn">Get Quote</string>
+</resources>

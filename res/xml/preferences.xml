@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory 
+        android:title="Alert Service"
+        android:key="first_category">
+        
+        <CheckBoxPreference 
+            android:key="check_quotes"
+            android:summary="Enable alert notifications"
+            android:title="Enable notifications" 
+            android:defaultValue="true"
+        />
+        
+        
+        <ListPreference 
+            android:key="quote_interval"
+            android:title="Alert interval"
+            android:summary="How often alert checks will be performed"
+            android:defaultValue="300000" 
+            android:entries="@array/updateInterval"
+            android:entryValues="@array/updateIntervalValues"
+            android:dependency="check_quotes"
+            android:enabled="true"
+        />    
+            
+    </PreferenceCategory>
+   
+</PreferenceScreen>

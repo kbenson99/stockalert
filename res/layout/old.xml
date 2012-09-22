@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:admobsdk="http://schemas.android.com/apk/res/com.pocketools.currency"
+ 	android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:scrollbars="none" >
+
+	<!-- EditText for plain text input -->
+	<TextView
+   		android:layout_width="fill_parent"
+   		android:layout_height="wrap_content"
+   		android:text="Ticker:" />
+
+	<EditText
+	   android:id="@+id/add_stock_symbol_directly"
+	   android:layout_width="match_parent"
+	   android:layout_height="wrap_content"
+	   android:singleLine="true" >
+	    <requestFocus />
+	</EditText>   
+
+	<TextView
+   		android:layout_width="fill_parent"
+   		android:layout_height="wrap_content"
+   		android:text="Breakout Price:" />
+
+	<EditText
+	    android:id="@+id/breakout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	            android:layout_marginRight="5.0dip"
+	            android:gravity="right"
+	            android:inputType="number"
+	            /> 
+	
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#ff000000"
+        android:padding="5.0sp"
+        android:shrinkColumns="*"
+        android:stretchColumns="*" >
+
+        <TableRow>
+
+            <TextView android:height="5.0sp" />
+        </TableRow>
+
+ 
+        <TableRow>
+
+            <EditText
+                android:id="@+id/add_stock_symbol_directly"
+                android:hint="ticker" 
+                android:layout_width="fill_parent"
+            	android:layout_height="wrap_content"
+           	 	android:layout_weight="1.0"
+            	android:paddingLeft="6.0dip"
+            	android:paddingTop="6.0dip"
+            	android:textColor="@color/black"
+            	android:textSize="10.0sp" />
+  
+			<EditText
+	            android:id="@+id/breakout"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginRight="5.0dip"
+	            android:gravity="right"
+	            android:inputType="number"
+	            /> 
+
+			<EditText
+	            android:id="@+id/target"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:layout_marginRight="5.0dip"
+	            android:gravity="right"
+	            android:inputType="number"
+	             />       	                       
+             
+
+        </TableRow>
+            <Button
+                android:id="@+id/add_stock_directly_button"
+                android:text="Add" 
+                android:onClick="onClick"
+                android:layout_span="1" />
+        <TableRow>
+
+            <TextView
+                android:layout_span="3"
+                android:background="#ff646d7e"
+                android:height="1.0sp"
+                android:padding="2.0sp" />
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>

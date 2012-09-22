@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+        
+        
+        <TextView
+            android:id="@+id/ticker"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:paddingLeft="6.0dip"
+            android:paddingTop="7.0dip"
+            android:textColor="@color/black"
+            android:textSize="13.0sp" 
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/lastQuote"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="right"
+            android:textColor="@color/blue"
+            android:textSize="11.0sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/lastChange"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="right"
+            android:textColor="@color/blue"
+            android:textSize="11.0sp" 
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/ChangePercentage"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="right"
+            android:textColor="@color/blue"
+            android:textSize="12.0sp"
+            android:textStyle="bold" />
+        
+        <TextView
+            android:id="@+id/BreakOut"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="center"
+            android:textColor="@color/blue"
+            android:textSize="11.0sp" 
+            android:textStyle="bold"/>
+        
+        <TextView
+            android:id="@+id/BreakDistance"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:gravity="right"
+            android:textColor="@color/purple"
+            android:textSize="12.0sp" 
+            android:paddingRight="8.0dip"/>        
+        
+
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5.0dip"
+        android:paddingLeft="9.0dip"
+        android:textColor="@color/blue"
+        android:textSize="17.0sp"/>    
+</LinearLayout> 
+

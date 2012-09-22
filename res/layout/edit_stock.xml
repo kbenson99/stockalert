@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:admobsdk="http://schemas.android.com/apk/res/com.pocketools.currency"
+ 	android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:scrollbars="none" >
+
+	<!-- EditText for plain text input -->
+	<TextView
+	    android:id="@+id/edit_stock_symbol"
+   		android:layout_width="fill_parent"
+   		android:layout_height="wrap_content"
+   		android:paddingTop="6.0dip"   		
+   		android:textColor="@color/white"
+   		android:textStyle="bold"
+   		android:text="Ticker:  "
+   		/> 
+
+	<TextView
+   		android:layout_width="fill_parent"
+   		android:layout_height="wrap_content"
+   		android:paddingTop="6.0dip"
+   		android:text="Breakout Price:" />
+
+	<EditText
+	    android:id="@+id/edit_breakout"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+        android:inputType="numberDecimal" >
+	    <requestFocus />
+	</EditText> 		
+
+	<LinearLayout 
+	   android:orientation="horizontal"
+	   android:layout_width="wrap_content"
+	   android:layout_height="wrap_content" 
+	   android:layout_centerInParent="true"
+	   android:layout_centerVertical="true"
+	   android:layout_centerHorizontal="true">	
+	
+            <Button
+                android:id="@+id/edit_stock_directly_button"
+                android:text="@string/EditTickerBtn" 
+                android:onClick="onClick"
+                android:paddingTop="6.0dip"
+                android:layout_width="80dp"
+       			android:layout_height="wrap_content"
+				/>
+            
+            <Button
+                android:id="@+id/cancel_stock_directly_button"
+                android:text="@string/CancelTickerBtn" 
+                android:onClick="onClick"
+                android:paddingTop="6.0dip"
+                android:layout_width="80dp"
+       			android:layout_height="wrap_content"
+				/>            
+    </LinearLayout>
+
+</LinearLayout>

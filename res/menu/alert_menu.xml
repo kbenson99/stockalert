@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/add_ticker"
+        android:title="@string/AddTicker"
+        android:icon="@drawable/add"
+        />
+	<item
+        android:id="@+id/refresh_alerts"
+        android:title="@string/RefreshAlerts"
+        android:icon="@drawable/refresh"
+        />
+	 <item
+        android:id="@+id/preferences"
+        android:title="Preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
+        /> 
+	 <item
+        android:id="@+id/export_alerts"
+        android:title="@string/ExportAlerts"
+        android:icon="@android:drawable/ic_menu_save"
+        />
+	 <item
+        android:id="@+id/import_alerts"
+        android:title="@string/ImportAlerts"
+        android:icon="@android:drawable/ic_menu_upload"
+        />         
+             
+ <!-- "file" submenu -->
+ <!-- <menu>
+            <item
+                android:id="@+id/add_ticker"
+                android:title="@string/AddTicker"/>
+            <item
+                android:id="@+id/delete"
+                android:title="@string/DeleteTicker"/>
+        </menu>
+    </item> -->
+
+</menu>
