@@ -102,8 +102,7 @@ public class Quote extends Activity
                 try
                 {
                     StockQuote m_stockquote = new StockQuote(this);
-                    JSONObject localJSONObject = m_stockquote.getJsonStockObject("\""
-                        + paramString + "\"");
+                    JSONObject localJSONObject = m_stockquote.getJsonStockObject(paramString );
 
 
                     Toast.makeText(this, localJSONObject.getString(Constants.JSON_NAME_KEY)

@@ -5,6 +5,7 @@ import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.widget.TabHost;
 import android.widget.Toast;
 
@@ -15,10 +16,11 @@ import com.benson.stockalert.utility.Network;
 public class TabDemo extends TabActivity  {
   
 	@Override
-	public void onCreate(Bundle savedInstanceState) {    
-		super.onCreate(savedInstanceState);    
-		setContentView(R.layout.tabhost); 
+	public void onCreate(Bundle savedInstanceState) {    		
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().build());		
 		
+		super.onCreate(savedInstanceState);    
+		setContentView(R.layout.tabhost); 		
 	
 		Resources res = getResources(); 
 		

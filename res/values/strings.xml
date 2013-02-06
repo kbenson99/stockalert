@@ -9,7 +9,7 @@
     
     
     <string name="JsonUrl">http://maps.googleapis.com/maps/api/geocode/json</string>
-    <string name="QuoteUrl">http://query.yahooapis.com/v1/public/yql?q=</string>
+    <string name="QuoteUrl">https://api.tradeking.com/v1/market/ext/quotes.json?symbols=</string>
     <string name="QuoteResource">/info?infotype=infoquoteall</string>
     
     <string name="AddTickerBtn">Add</string>

@@ -3,9 +3,9 @@
     android:installLocation="auto"
     package="com.benson.stockalert"
     android:versionCode="1"
-    android:versionName="1.0.6" >
+    android:versionName="1.0.7" >
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="10" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission  android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> 
@@ -86,7 +86,13 @@
             android:label="@string/Edit_Page"
             android:theme="@android:style/Theme.Dialog" >
         </activity> 
-        
+ 
+        <activity
+            android:name=".Chart"
+            android:label="@string/Chart_Page"
+            >
+        </activity> 
+                
         <activity
             android:name=".prefs.AlertPreferences"
             android:label="@string/app_name" >

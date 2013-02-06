@@ -1,7 +1,7 @@
 package com.benson.stockalert.utility;
 
 import java.util.ArrayList;
-import java.util.List;
+
 
 import com.benson.stockalert.R;
 

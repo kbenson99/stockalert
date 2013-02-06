@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.benson.stockalert.DatabaseCSVTask;
 import com.benson.stockalert.utility.Constants;
 import com.benson.stockalert.utility.StockDataSource;
 
@@ -55,8 +54,7 @@ public class AddStock extends Activity
                     try
                     {
 
-                        JSONObject jsonObject = m_stockquote.getJsonStockObject("\""
-                            + this.m_ticker.getText().toString() + "\"");
+                        JSONObject jsonObject = m_stockquote.getJsonStockObject(this.m_ticker.getText().toString());
 
                         if (jsonObject.getString(Constants.JSON_EXCHANGE_KEY).equals("null"))
                         {

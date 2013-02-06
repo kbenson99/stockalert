@@ -149,8 +149,7 @@ public class StockBroadcastReceiver extends BroadcastReceiver
             {
                 for (Stock alertstock : mystocks)
                 {
-                    arrayList.add("\""
-                        + alertstock.getStock() + "\"");
+                    arrayList.add(alertstock.getStock());
                 }
 
                 if (arrayList.size() > 0)

@@ -35,7 +35,7 @@ public class StockAdapter extends ArrayAdapter<Stock>
     public ArrayList<Stock> items;
     private StockQuote       m_stockquote;
     public JSONArray        localJSONArray     = null;
-    private JSONObject       localJSONObject    = null;
+    public JSONObject       localJSONObject    = null;
 
     private String           myName;
     private String           m_stockString;
@@ -58,7 +58,7 @@ public class StockAdapter extends ArrayAdapter<Stock>
     	List<String> mylist = new ArrayList<String>();
     	for (Stock mstock : this.items)
     	{
-    		mylist.add("\"" + mstock.getStock() + "\"");
+    		mylist.add( mstock.getStock() );
     	}
     	return mylist;
     }
@@ -92,13 +92,16 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
             try
             {
-
                 this.m_stockString = StringUtils.join(getStockList(), ',');
 
 
                 if (getStockList().size() == 1)
                 {
-                    localJSONObject = this.m_stockquote.getJsonStockObject(this.m_stockString);
+                	if (localJSONObject == null) 
+                	{
+	                    localJSONObject = this.m_stockquote.getJsonStockObject(this.m_stockString);
+	                    this.m_stockquote.m_stockCalls++;
+                	}
                 }
                 else
                 {
@@ -270,7 +273,6 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
                 if (m_stockBrokeout)
                 {
-                    name = name.toUpperCase();
                     text = new SpannableString(name);
 
                     text.setSpan(new ForegroundColorSpan(Color.GREEN), 0, text.length(), 0);

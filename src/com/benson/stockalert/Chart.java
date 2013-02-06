@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.webkit.WebView;
 
-import com.benson.stockalert.utility.Network;
 import com.benson.stockalert.utility.Stock;
 
 public class Chart extends Activity{
