@@ -4,11 +4,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.benson.stockalert.DatabaseCSVTask;
 import com.benson.stockalert.utility.Constants;
 import com.benson.stockalert.utility.StockDataSource;
 
@@ -46,8 +49,8 @@ public class AddStock extends Activity
                     datasource = new StockDataSource(this);
                     datasource.open();
 
-                    Log.d(myName, datasource.getAllStocks()
-                        + "");
+//                    Log.d(myName, datasource.getAllStocks()
+//                        + "");
 
                     try
                     {
@@ -55,15 +58,23 @@ public class AddStock extends Activity
                         JSONObject jsonObject = m_stockquote.getJsonStockObject("\""
                             + this.m_ticker.getText().toString() + "\"");
 
-                        datasource.createStock(this.m_ticker.getText().toString(),
-                            jsonObject.getString(Constants.JSON_EXCHANGE_KEY),
-                            Double.parseDouble(this.m_breakout.getText().toString()));
-                        Log.i(this.myName, "Stock ticker "
-                            + this.m_ticker.getText().toString() + " added to database");
+                        if (jsonObject.getString(Constants.JSON_EXCHANGE_KEY).equals("null"))
+                        {
+                        	Toast.makeText(AddStock.this, this.m_ticker.getText().toString() + " is not a valid stock symbol", Toast.LENGTH_SHORT).show();
+                        }
+                        else
+                        {	                        
+	                        datasource.createStock(this.m_ticker.getText().toString(),
+	                            jsonObject.getString(Constants.JSON_EXCHANGE_KEY),
+	                            Double.parseDouble(this.m_breakout.getText().toString()), 
+	                            Constants.STOCK_NOT_ALERTED);
+	                        Log.i(this.myName, "Stock ticker "
+	                            + this.m_ticker.getText().toString() + " added to database");
+                        }
                     }
                     catch (JSONException je)
                     {
-                        Log.e(this.myName, "Failed to obtain exchange information for "
+                        Log.e(this.myName, "Failed to obtain stock information for "
                             + this.m_ticker.getText().toString());
                     }
 
@@ -76,6 +87,9 @@ public class AddStock extends Activity
                     }
                 }
 
+                Intent i = getIntent(); //get the intent that has been called, i.e you did called with startActivityForResult();
+                setResult(Activity.RESULT_OK, i);  //now you can use Activity.RESULT_OK, its irrelevant whats the resultCode    
+                                
                 this.finish();
                 break;
             case R.id.cancel_stock_directly_button:

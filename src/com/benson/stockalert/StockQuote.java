@@ -63,7 +63,7 @@ public class StockQuote
         }
         catch (Exception e)
         {
-            Log.e(this.myName, "Error returned for getJsonStockArray: "
+            Log.e(this.myName, "Error returned for getJsonStockObject: "
                 + m_stockUrl, e);
         }
         return jsonObject;
@@ -105,7 +105,18 @@ public class StockQuote
     private String getYqlUrl(String stock)
     {
         String m_stock = stock.replaceAll("\"", "%22");
-
+        
+        if (!m_stock.startsWith("%22"))
+        {
+        	m_stock =  "%22" + m_stock;
+        }
+        if (!m_stock.endsWith("%22"))
+        {
+        	m_stock = m_stock + "%22";
+        }
+        
+        Log.i(this.myName, "Stock = " + m_stock);
+        
         String yqlString = "select+"
             + StringUtils.join(Constants.QueryFields(), ',')
             + "+from+yahoo.finance.quotes+where+symbol+in+(" + m_stock
@@ -130,7 +141,7 @@ public class StockQuote
 
     private String retrieveJsonString(String url)
     {
-
+        Log.i(this.myName, url);
         StringBuilder sb = new StringBuilder();
 
         try

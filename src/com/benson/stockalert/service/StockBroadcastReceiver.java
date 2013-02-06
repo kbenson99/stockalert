@@ -95,7 +95,7 @@ public class StockBroadcastReceiver extends BroadcastReceiver
                     {
                         Log.i(this.myName,
                             "No network connection for alert notification.  Try again in 45secs");
-                        Thread.sleep(45000);
+                        new Thread().sleep(45000);
                     }
                     catch (InterruptedException ie)
                     {
@@ -238,7 +238,7 @@ public class StockBroadcastReceiver extends BroadcastReceiver
                                 }
 
                                 if (m_stockBrokeout
-                                    && stock.getAlerted() == 0)
+                                    && stock.getAlerted() ==  Constants.STOCK_NOT_ALERTED)
                                 {
                                     int icon = android.R.drawable.btn_star_big_on;
                                     StringBuffer alertmsg = new StringBuffer();
@@ -294,7 +294,7 @@ public class StockBroadcastReceiver extends BroadcastReceiver
                                     v.vibrate(pattern, -1);
 
 
-                                    datasource.updateStockAlert(stock.getId(), 1);
+                                    datasource.updateStockAlert(stock.getId(), Constants.STOCK_ALERTED);
                                 }
                             }
 

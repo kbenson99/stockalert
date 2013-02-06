@@ -77,12 +77,14 @@
 
         <activity
             android:name=".AddStock"
-            android:label="@string/Add_Page" >
+            android:label="@string/Add_Page"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
         
         <activity
             android:name=".EditStock"
-            android:label="@string/Edit_Page" >
+            android:label="@string/Edit_Page"
+            android:theme="@android:style/Theme.Dialog" >
         </activity> 
         
         <activity

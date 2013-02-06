@@ -10,6 +10,8 @@ public class Constants {
 		public static final String DEBUG = "Debug";
 		public static final String INFO = "INFO";
 		
+		public static final int    STOCK_NOT_ALERTED			= 0;
+		public static final int    STOCK_ALERTED			    = 1;
 		
 		public static final String JSON_EXCHANGE_KEY			= "StockExchange";
 		public static final String JSON_TICKER_KEY 				= "Symbol";

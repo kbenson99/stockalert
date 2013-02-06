@@ -19,7 +19,6 @@ public class TabDemo extends TabActivity  {
 		super.onCreate(savedInstanceState);    
 		setContentView(R.layout.tabhost); 
 		
-
 	
 		Resources res = getResources(); 
 		
@@ -50,11 +49,6 @@ public class TabDemo extends TabActivity  {
 				.setContent(intent);    
 		//tabHost.addTab(spec);
 		
-//		intent = new Intent().setClass(this, StockAlert.class);    
-//		spec = tabHost.newTabSpec("songs").setIndicator("Songs",                      
-//				res.getDrawable(R.drawable.ic_tab_artists))                  
-//				.setContent(intent);    
-		//tabHost.addTab(spec); 
 		
 		if (!new Network(this).isOnline()) {
 			Toast mytoast = Toast.makeText(this, Constants.NO_NETWORK_CONNECTION, Toast.LENGTH_LONG);

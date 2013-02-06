@@ -5,6 +5,7 @@
     <string name="Alerts_Page">Alerts</string>
     <string name="Add_Page">Add Stock</string>
     <string name="Edit_Page">Edit Stock</string>
+    <string name="Chart_Page">View Chart</string>
     
     
     <string name="JsonUrl">http://maps.googleapis.com/maps/api/geocode/json</string>
@@ -19,12 +20,14 @@
     <string name="RefreshAlerts">Refresh</string>
     <string name="Preferences">Preferences</string>
     <string name="ExportAlerts">Export Alerts</string>
+    <string name="RemoveAll">Remove All</string>
     <string name="ImportAlerts">Import Alerts</string>
     
-    <string name="EditStockKey">stock</string>
+    <string name="StockKey">stock</string>
     
     <string name="Delete">Delete</string>
     <string name="Edit">Edit</string>
+    <string name="Chart">Chart</string>
     
     <string name="UnknownEchange">unknown</string>
     
@@ -33,6 +36,6 @@
     <item format="integer" type="integer" name="dailyStop">17</item>    
         
    
-    <item format="string" type="bool" name="verbose">false</item>
+    <item format="string" type="bool" name="verbose">true</item>
     <string name="queryBtn">Get Quote</string>
 </resources>

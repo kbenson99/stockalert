@@ -22,6 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -41,6 +42,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,6 +53,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
@@ -92,6 +95,8 @@ public class Alerts extends ListActivity
 
     Format                          formatter              = new SimpleDateFormat(
                                                                "E, MMM dd, yyyy HH:mm:ss");
+    
+    static final int 				STATIC_ACTIVITY_ADDSTOCK_RESULT = 2; //positive > 0 integer.    
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -108,8 +113,7 @@ public class Alerts extends ListActivity
         header = inflater.inflate(R.layout.header, null);
         lv.addHeaderView(header, null, false);
 
-        this.m_adapter = new StockAdapter(this, R.layout.row, new ArrayList<Stock>(),
-            new ArrayList());
+        this.m_adapter = new StockAdapter(this, R.layout.row, new ArrayList<Stock>());
         this.getStocks();
         this.sortStocks();
 
@@ -122,8 +126,6 @@ public class Alerts extends ListActivity
         }
         else
         {
-
-            // View header = getLayoutInflater().inflate(R.layout.header, null);
 
             // Create a handler to update the UI
             handler = new Handler();
@@ -186,6 +188,8 @@ public class Alerts extends ListActivity
     {
         public void run()
         {
+        	m_adapter.setNotifyOnChange(false);
+        	
             if (m_adapter != null)
             {
                 if (m_adapter.getCount() == 0)
@@ -194,10 +198,11 @@ public class Alerts extends ListActivity
                     {
                         m_adapter.add(stock);
                     }
-                }
-                m_adapter.notifyDataSetChanged();
+                }                
             }
 
+            m_adapter.notifyDataSetChanged();
+            
             m_ProgressDialog.dismiss();
             m_progressDialogActive = false;
         }
@@ -259,7 +264,7 @@ public class Alerts extends ListActivity
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3)
             {
-                position = arg2;
+                position = arg2 -1;
                 return false;
             }
         });
@@ -331,8 +336,14 @@ public class Alerts extends ListActivity
             case R.id.EditStock:
                 this.m_menuSelectedStock = this.m_adapter.getItem(position);
                 Intent i = new Intent(this, EditStock.class);
-                i.putExtra(this.getString(R.string.EditStockKey), this.m_menuSelectedStock);
+                i.putExtra(this.getString(R.string.StockKey), this.m_menuSelectedStock);
                 startActivity(i);
+                return (true);
+            case R.id.ViewChart:
+                this.m_menuSelectedStock = this.m_adapter.getItem(position);
+                Intent c = new Intent(this, Chart.class);
+                c.putExtra(this.getString(R.string.StockKey), this.m_menuSelectedStock);
+                startActivity(c);
                 return (true);
         }
         return false;
@@ -345,6 +356,23 @@ public class Alerts extends ListActivity
         inflater.inflate(R.menu.alert_menu, menu);
         return true;
     }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+          if (requestCode == STATIC_ACTIVITY_ADDSTOCK_RESULT) //check if the request code is the one I sent
+          {
+                 if (resultCode == Activity.RESULT_OK) 
+                 {
+                     //now export the stocks being tracked to the stock backup file
+                     new DatabaseCSVTask(this).execute(Constants.CSV_EXPORT);
+                     Log.i("Stock Alert export","Export complete");
+                 }
+          }
+
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }    
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -353,7 +381,11 @@ public class Alerts extends ListActivity
         switch (item.getItemId())
         {
             case R.id.add_ticker:
-                startActivity(new Intent(this, AddStock.class));
+            	Intent addstock = new Intent(this, AddStock.class);
+            	startActivityForResult(addstock, STATIC_ACTIVITY_ADDSTOCK_RESULT);
+                //startActivity(new Intent(this, AddStock.class));
+                
+
                 return true;
             case R.id.refresh_alerts:
                 refresh();
@@ -363,11 +395,16 @@ public class Alerts extends ListActivity
                 startActivityForResult(intent, 0);
                 return true;
             case R.id.export_alerts:
-                new DatabaseCSVTask().execute(Constants.CSV_EXPORT);
+                new DatabaseCSVTask(this).execute(Constants.CSV_EXPORT);
                 return true;
             case R.id.import_alerts:
-                new DatabaseCSVTask().execute(Constants.CSV_LOAD);
+                new DatabaseCSVTask(this).execute(Constants.CSV_LOAD);
                 refresh();
+                return true;
+            case R.id.clear_stocks:
+                Alerts.this.datasource.open();
+                Alerts.this.datasource.clearStocks();
+                Toast.makeText(Alerts.this, "Stock clear complete!", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -450,10 +487,9 @@ public class Alerts extends ListActivity
 
             this.setupProgress(); // start the progress dialog
 
+            m_adapter.setNotifyOnChange(false);
             m_adapter.clear(); // clear the list adapter
 
-            // m_adapter.notifyDataSetChanged();
-            m_adapter.localJSONArray = null;
 
             if (m_stocks != null
                 && m_stocks.size() > 0)
@@ -463,7 +499,11 @@ public class Alerts extends ListActivity
                     m_adapter.add(stock);
                 }
             }
+            
+            m_adapter.localJSONArray = null;
+            
             m_adapter.notifyDataSetChanged();
+
 
             if (header == null)
             {
@@ -498,27 +538,9 @@ public class Alerts extends ListActivity
     {
         try
         {
-            if (this.m_adapter == null)
-            {
-                this.m_adapter = new StockAdapter(this, R.layout.row, new ArrayList<Stock>(),
-                    new ArrayList());
-            }
-
-            this.m_adapter.m_arrayList.clear();
-
             datasource = new StockDataSource(this);
             datasource.open();
             this.m_stocks = datasource.getAllStocks();
-
-            if (this.m_stocks != null
-                && this.m_stocks.size() > 0)
-            {
-                for (Stock stock : this.m_stocks)
-                {
-                    this.m_adapter.m_arrayList.add("\""
-                        + stock.getStock() + "\"");
-                }
-            }
         }
         catch (Exception e)
         {
@@ -533,449 +555,10 @@ public class Alerts extends ListActivity
         }
         // runOnUiThread(returnRes);
     }
+    
 
-    private class DatabaseCSVTask extends AsyncTask<String, Void, Boolean>
-    {
-        private final String         myName = this.getClass().getSimpleName();
 
-        private final ProgressDialog dialog = new ProgressDialog(Alerts.this);
 
-        private String               actionType;
-
-        @Override
-        protected void onPreExecute()
-        {
-            this.dialog.setMessage("Performing database action...");
-
-            this.dialog.show();
-        }
-
-        protected Boolean doInBackground(final String... args)
-        {
-            this.actionType = args[0];
-
-            if (actionType == Constants.CSV_EXPORT)
-            {
-                return this.export();
-            }
-            else
-            {
-                return this.load();
-            }
-        }
-
-        private boolean load()
-        {
-            StockDataSource datasource = null;
-
-            try
-            {
-                InputStream file = new FileInputStream(new File(Constants.exportDir,
-                    Constants.STOCK_CSV_NAME));
-                Reader csvFile = new InputStreamReader(file);
-
-                CSVReader<Stock> stockReader = new CSVReaderBuilder<Stock>(csvFile).entryParser(
-                    new StockEntryParser()).build();
-                List<Stock> stocks = stockReader.readAll();
-
-                datasource = new StockDataSource(getApplicationContext());
-                datasource.open();
-
-                datasource.clearStocks();
-
-                for (Stock mystock : stocks)
-                {
-                    datasource.createStock(mystock.getStock(), mystock.getExchange(),
-                        mystock.getBreakout());
-                }
-
-                file.close();
-                stockReader.close();
-                csvFile.close();
-
-                return true;
-            }
-            catch (SQLException sqlEx)
-            {
-                Log.e("StockAlert load", sqlEx.getMessage(), sqlEx);
-
-                return false;
-
-            }
-            catch (IOException e)
-            {
-                Log.e("StockAlert load", e.getMessage(), e);
-
-                return false;
-            }
-            finally
-            {
-                if (datasource != null)
-                {
-                    datasource.close();
-                }
-            }
-        }
-
-        private boolean export()
-        {
-
-            File exportDir = new File(Constants.exportDir);
-
-            if (!exportDir.exists())
-            {
-                exportDir.mkdirs();
-            }
-
-            File file = new File(exportDir, Constants.STOCK_CSV_NAME);
-            Log.i(this.myName, file.getAbsolutePath());
-
-            StockDataSource datasource = null;
-
-            try
-
-            {
-                datasource = new StockDataSource(getApplicationContext());
-                datasource.open();
-                ArrayList<Stock> m_stocks = datasource.getAllStocks();
-
-                List<Stock> stocks = new ArrayList<Stock>();
-                for (Stock mystock : m_stocks)
-                {
-                    stocks.add(new Stock(mystock.getStock(), mystock.getExchange(), mystock
-                        .getBreakout()));
-                }
-
-                FileWriter fwriter = new FileWriter(file);
-                CSVWriter<Stock> csvWriter = new CSVWriterBuilder<Stock>(fwriter).entryConverter(
-                    new StockEntryConverter()).build();
-                csvWriter.writeAll(stocks);
-
-                csvWriter.close();
-                return true;
-
-            }
-            catch (SQLException sqlEx)
-
-            {
-                Log.e("StockAlert export", sqlEx.getMessage(), sqlEx);
-
-                return false;
-
-            }
-            catch (IOException e)
-            {
-                Log.e("StockAlert export", e.getMessage(), e);
-
-                return false;
-
-            }
-            finally
-            {
-                if (datasource != null)
-                {
-                    datasource.close();
-                }
-            }
-
-        }
-
-        protected void onPostExecute(final Boolean success)
-        {
-
-            if (this.dialog.isShowing())
-            {
-
-                this.dialog.dismiss();
-
-            }
-
-            if (success)
-            {
-                Toast.makeText(Alerts.this, "Action successful!", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                Toast.makeText(Alerts.this, "Action failed", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-
-    }
-
-    private class StockAdapter extends ArrayAdapter<Stock>
-    {
-
-        private HashMap          m_stockMap         = new HashMap();
-        private ArrayList<Stock> items;
-        private StockQuote       m_stockquote;
-        private JSONArray        localJSONArray     = null;
-        private JSONObject       localJSONObject    = null;
-
-        private String           myName;
-        private String           m_stockString;
-
-        private ArrayList        m_arrayList;
-
-        private int              m_dataPullComplete = 0;
-
-        DecimalFormat            decimalFormat      = new DecimalFormat("#.##");
-
-        public StockAdapter(Context context, int textViewResourceId, ArrayList<Stock> items,
-            ArrayList list)
-        {
-
-            super(context, textViewResourceId, items);
-
-            this.myName = this.getContext().getClass().getSimpleName();
-
-            this.m_stockquote = new StockQuote(context);
-            this.items = items;
-            this.m_arrayList = list;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent)
-        {
-            View v = convertView;
-            if (v == null)
-            {
-                LayoutInflater inflater = getLayoutInflater();
-
-                v = inflater.inflate(R.layout.row, null);
-            }
-
-            Stock o = items.get(position);
-
-            if (o != null)
-            {
-                TextView ticker = (TextView) v.findViewById(R.id.ticker);
-                TextView lastQuote = (TextView) v.findViewById(R.id.lastQuote);
-                TextView change = (TextView) v.findViewById(R.id.lastChange);
-                TextView changeperc = (TextView) v.findViewById(R.id.ChangePercentage);
-                TextView breakOut = (TextView) v.findViewById(R.id.BreakOut);
-                TextView stockName = (TextView) v.findViewById(R.id.name);
-                TextView breakDistance = (TextView) v.findViewById(R.id.BreakDistance);
-
-                try
-                {
-                    localJSONObject = null;
-
-                    this.m_stockString = StringUtils.join(this.m_arrayList, ',');
-
-
-                    if (this.m_arrayList.size() == 1)
-                    {
-                        localJSONObject = this.m_stockquote.getJsonStockObject(this.m_stockString);
-                    }
-                    else
-                    {
-                        if (localJSONArray == null)
-                        {
-                            if (m_stockString.length() == 0)
-                            {
-                                localJSONArray = this.m_stockquote.getJsonStockArray(o.getStock());
-                            }
-                            else
-                            {
-                                localJSONArray = this.m_stockquote.getJsonStockArray(m_stockString);
-                            }
-                            this.m_stockquote.m_stockCalls++;
-                        }
-
-                        if (localJSONArray != null)
-                        {
-                            if (m_stockMap.size() == 0)
-                            {
-                                for (int i = 0; i < localJSONArray.length(); ++i)
-                                {
-                                    localJSONObject = localJSONArray.getJSONObject(i);
-
-                                    m_stockMap.put(
-                                        localJSONObject.getString(Constants.JSON_TICKER_KEY),
-                                        localJSONObject);
-                                }
-                            }
-                        }
-
-                        if (m_stockMap.containsKey(o.getStock()))
-                        {
-                            localJSONObject = (JSONObject) m_stockMap.get(o.getStock());
-                        }
-                        else
-                        {
-                            localJSONArray = this.m_stockquote.getJsonStockArray(o.getStock());
-                            localJSONObject = localJSONArray.getJSONObject(0);
-                            this.m_stockquote.m_stockCalls++;
-                        }
-                    }
-
-                }
-                catch (NullPointerException e)
-                {
-                    Log.e(this.myName, "Failed to obtain JSONObject for "
-                        + o.getStock(), e);
-                }
-                catch (JSONException e)
-                {
-                    Log.e(this.myName, "Failed to obtain JSONObject for "
-                        + o.getStock(), e);
-                }
-
-                boolean m_stockBrokeout = false;
-
-                double currentPrice = 10000;
-                try
-                {
-                    currentPrice = Double.parseDouble(localJSONObject
-                        .getString(Constants.JSON_PRICE_KEY));
-                    m_stockBrokeout = o.hasBroken(currentPrice);
-                }
-                catch (JSONException je)
-                {
-                    Log.e(this.myName, "Failed to obtain stock information for "
-                        + o.getStock());
-                }
-
-                ticker.setText(o.getStock());
-
-                try
-                {
-                    lastQuote.setText(localJSONObject.getString(Constants.JSON_PRICE_KEY));
-                }
-                catch (JSONException je)
-                {
-                    Log.e(this.myName, "Failed to obtain current quote for "
-                        + o.getStock());
-                }
-
-                try
-                {
-                    change.setText(localJSONObject.getString(Constants.JSON_CHANGE_KEY));
-                }
-                catch (JSONException je)
-                {
-                    Log.e(this.myName, "Failed to obtain last change for "
-                        + o.getStock());
-                }
-
-                try
-                {
-                    SpannableString text;
-
-                    String stockChange = localJSONObject
-                        .getString(Constants.JSON_CHANGE_PERCENT_KEY);
-                    stockChange = stockChange.substring(0, stockChange.indexOf("%") - 1);
-                    double percChange = Double.parseDouble(stockChange);
-
-                    if (percChange < 0)
-                    {
-                        stockChange = "("
-                            + percChange + ")";
-                    }
-                    else
-                    {
-                        stockChange = percChange
-                            + "";
-                    }
-
-                    text = new SpannableString(stockChange
-                        + "%");
-
-                    if (percChange < 0)
-                    {
-                        text.setSpan(new ForegroundColorSpan(Color.RED), 0, text.length(), 0);
-                    }
-                    else
-                    {
-                        text.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), 0);
-                        text.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                            text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        text.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                            text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-
-                    changeperc.setText(text, BufferType.SPANNABLE);
-
-                }
-                catch (JSONException je)
-                {
-                    Log.e(this.myName, "Failed to obtain last change % for "
-                        + o.getStock());
-                }
-
-
-                SpannableString disText;
-                double dist = currentPrice
-                    - o.getBreakout();
-
-                disText = new SpannableString(decimalFormat.format(dist));
-
-                if (dist < 0)
-                {
-                    disText.setSpan(new ForegroundColorSpan(Color.RED), 0, disText.length(), 0);
-                }
-                else
-                {
-                    disText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, disText.length(), 0);
-                    disText.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                        disText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    disText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                        disText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-
-                breakDistance.setText(disText, BufferType.SPANNABLE);
-
-
-                breakOut.setText(decimalFormat.format(o.getBreakout()));
-
-                try
-                {
-                    String name = localJSONObject.getString(Constants.JSON_NAME_KEY);
-
-                    SpannableString text;
-
-                    if (m_stockBrokeout)
-                    {
-                        name = name.toUpperCase();
-                        text = new SpannableString(name);
-
-                        text.setSpan(new ForegroundColorSpan(Color.GREEN), 0, text.length(), 0);
-                        text.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                            text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        text.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                            text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                        // create our span sections, and assign a format to
-                        // each.
-                        // str.setSpan(new
-                        // StyleSpan(android.graphics.Typeface.ITALIC), 0, 7,
-                        // Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // str.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8,
-                        // 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        // str.setSpan(new
-                        // StyleSpan(android.graphics.Typeface.BOLD), 21,
-                        // str.length()- 1,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                    else
-                    {
-                        text = new SpannableString(name);
-                        text.setSpan(new StrikethroughSpan(), 0, text.length(), 0);
-                    }
-
-                    stockName.setText(text, BufferType.SPANNABLE);
-                }
-                catch (JSONException je)
-                {
-                    Log.e(this.myName, "Failed to obtain ticket name for "
-                        + o.getStock());
-                }
-
-            }
-            this.m_dataPullComplete = 1;
-            return v;
-        }
-    }
 
     static public class MyThread extends Thread
     {

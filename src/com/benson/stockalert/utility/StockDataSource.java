@@ -42,9 +42,10 @@ public class StockDataSource {
 	}
 	
 	
-	public void updateStock(Long Id, double breakout) {
+	public void updateStock(Long Id, double breakout, int alerted) {
 		ContentValues values = new ContentValues();
 		values.put(MySQLiteHelper.COLUMN_BREAKOUT, breakout );
+		values.put(MySQLiteHelper.COLUMN_ALERTED, alerted );
 		database.update(MySQLiteHelper.TABLE_STOCKS, values, MySQLiteHelper.COLUMN_ID + "=" + Id, null); 
 	}
 	
@@ -63,11 +64,12 @@ public class StockDataSource {
 	
 	
 
-	public Stock createStock(String stock, String exchange, double breakout) {
+	public Stock createStock(String stock, String exchange, double breakout, int alerted) {
 		ContentValues values = new ContentValues();
 		values.put(MySQLiteHelper.COLUMN_STOCK, stock.toUpperCase() );
 		values.put(MySQLiteHelper.COLUMN_EXCHANGE, exchange );		
 		values.put(MySQLiteHelper.COLUMN_BREAKOUT, breakout );
+		values.put(MySQLiteHelper.COLUMN_ALERTED, alerted );
 		long insertId = database.insert(MySQLiteHelper.TABLE_STOCKS, null,
 				values);
 		
@@ -79,7 +81,8 @@ public class StockDataSource {
 			cursor = database.query(MySQLiteHelper.TABLE_STOCKS,
 									allColumns, MySQLiteHelper.COLUMN_ID + " = " + insertId, null,
 									null, null, null);
-			cursor.moveToFirst();
+			//cursor.moveToFirst();
+			cursor.moveToLast();
 			newStock = cursorToStock(cursor);			
 		}
 		finally {
@@ -127,6 +130,7 @@ public class StockDataSource {
 	public Stock getStock(Long Id) {	
 		Cursor cursor = null;
 		Stock stock;
+		this.open();
 		try {
 			cursor = database.query(MySQLiteHelper.TABLE_STOCKS,
 									allColumns, MySQLiteHelper.COLUMN_ID + " = " + Id, null,
@@ -137,6 +141,9 @@ public class StockDataSource {
 		finally {
 			if (cursor != null){
 				cursor.close();
+			}
+			if ( database != null){
+				this.close();
 			}
 		}	
 		return stock;

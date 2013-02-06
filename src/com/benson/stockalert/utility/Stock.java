@@ -11,10 +11,12 @@ public class Stock implements Serializable{
 	private int alerted;
 	
 	
-	public Stock(String stock, String exchange, double breakout) {
+	public Stock(String stock, String exchange, double breakout, int alerted) {
 		this.setStock(stock);
 		this.setExchange(exchange);
 		this.setBreakout(breakout);
+		this.setAlerted(alerted);
+		
 	}
 	
 	public Stock(){};

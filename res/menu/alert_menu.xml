@@ -25,7 +25,12 @@
         android:id="@+id/import_alerts"
         android:title="@string/ImportAlerts"
         android:icon="@android:drawable/ic_menu_upload"
-        />         
+        />  
+	 <item
+        android:id="@+id/clear_stocks"
+        android:title="@string/RemoveAll"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        />               
              
  <!-- "file" submenu -->
  <!-- <menu>

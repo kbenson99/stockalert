@@ -20,7 +20,6 @@ public class Network {
 		//returns if we have a network or WiFi connection
 		Log.i(myName, "Checking if we have a network connection");
 		ConnectivityManager cm = (ConnectivityManager) myContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		Log.i(this.myName, cm.toString());
 		
 		NetworkInfo mWifi = cm.getActiveNetworkInfo();
 		//NetworkInfo mWifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -35,7 +34,6 @@ public class Network {
 		
 		Log.i(myName, "Network connection available:  " + (mWifi.isConnectedOrConnecting() || mWifi.isConnected()) );
 		
-		return ( mWifi.isConnectedOrConnecting() || mWifi.isConnected() );
-		
+		return ( mWifi.isConnectedOrConnecting() || mWifi.isConnected() );		
 	}
 }
