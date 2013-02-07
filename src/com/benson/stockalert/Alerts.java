@@ -154,6 +154,7 @@ public class Alerts extends ListActivity
         public void run()
         {
         	m_adapter.setNotifyOnChange(false);
+        	m_adapter.setUpdateInProgress(true);
         	
             if (m_adapter != null)
             {
@@ -166,6 +167,7 @@ public class Alerts extends ListActivity
                 }                
             }
 
+            m_adapter.setUpdateInProgress(false);
             m_adapter.notifyDataSetChanged();
             
             m_ProgressDialog.dismiss();
@@ -453,6 +455,7 @@ public class Alerts extends ListActivity
             this.setupProgress(); // start the progress dialog
 
             m_adapter.setNotifyOnChange(false);
+            m_adapter.setUpdateInProgress(true);
             m_adapter.clear(); // clear the list adapter
 
 
@@ -468,6 +471,7 @@ public class Alerts extends ListActivity
             m_adapter.localJSONObject = null;
             m_adapter.localJSONArray = null;
             
+            m_adapter.setUpdateInProgress(false);
             m_adapter.notifyDataSetChanged();
 
 

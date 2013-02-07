@@ -14,11 +14,16 @@ public class Constants {
 		public static final int    STOCK_ALERTED			    = 1;
 		
 		public static final String JSON_EXCHANGE_KEY			= "exch";
+		public static final String JSON_CHANGE_SIGN_KEY			= "chg_sign";
 		public static final String JSON_TICKER_KEY 				= "symbol";
 		public static final String JSON_PRICE_KEY				= "last";
 		public static final String JSON_CHANGE_KEY				= "chg_t";
 		public static final String JSON_CHANGE_PERCENT_KEY		= "pchg";
 		public static final String JSON_NAME_KEY				= "name";
+		
+		public static final String JSON_HI_KEY				= "hi";
+		public static final String JSON_LO_KEY				= "lo";
+		
 		
 		public static final String NO_NETWORK_CONNECTION		= "No Network Connection";
 		

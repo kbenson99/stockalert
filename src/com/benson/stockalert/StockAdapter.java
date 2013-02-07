@@ -41,6 +41,8 @@ public class StockAdapter extends ArrayAdapter<Stock>
     private String           m_stockString;
 
     DecimalFormat            decimalFormat      = new DecimalFormat("#.##");
+    
+    private boolean			 updateInProgress = false;
 
     public StockAdapter(Context context, int textViewResourceId, ArrayList<Stock> items)
     {
@@ -63,9 +65,13 @@ public class StockAdapter extends ArrayAdapter<Stock>
     	return mylist;
     }
     
+    public void setUpdateInProgress(boolean value)
+    {
+    	this.updateInProgress = value;
+    }
+
+
     
-
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
@@ -79,7 +85,7 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
         Stock o = items.get(position);
         
-        if (o != null)
+        if (o != null && this.updateInProgress == false)
         {
         	Log.i(this.myName, "StockAdapter updating view");
             TextView ticker = (TextView) v.findViewById(R.id.ticker);
@@ -89,6 +95,9 @@ public class StockAdapter extends ArrayAdapter<Stock>
             TextView breakOut = (TextView) v.findViewById(R.id.BreakOut);
             TextView stockName = (TextView) v.findViewById(R.id.name);
             TextView breakDistance = (TextView) v.findViewById(R.id.BreakDistance);
+
+//            TextView lowPrice = (TextView) v.findViewById(R.id.lo);
+//            TextView highPrice = (TextView) v.findViewById(R.id.high);
 
             try
             {
@@ -176,9 +185,16 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
             ticker.setText(o.getStock());
 
+            String direction = "";
             try
             {
-                lastQuote.setText(localJSONObject.getString(Constants.JSON_PRICE_KEY));
+                lastQuote.setText(direction + localJSONObject.getString(Constants.JSON_PRICE_KEY)); 
+                if (localJSONObject.getString(Constants.JSON_CHANGE_SIGN_KEY).equals("d"))
+                {
+                	direction = "-";
+                }
+                
+            	              
             }
             catch (JSONException je)
             {
@@ -188,7 +204,13 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
             try
             {
-                change.setText(localJSONObject.getString(Constants.JSON_CHANGE_KEY));
+
+            	String priceChange = localJSONObject.getString(Constants.JSON_CHANGE_KEY);
+                change.setText(direction + localJSONObject.getString(Constants.JSON_CHANGE_KEY));
+                
+                
+//                lowPrice.setText(localJSONObject.getString(Constants.JSON_LO_KEY));
+//                highPrice.setText(localJSONObject.getString(Constants.JSON_HI_KEY));
             }
             catch (JSONException je)
             {
@@ -205,7 +227,7 @@ public class StockAdapter extends ArrayAdapter<Stock>
                 stockChange = stockChange.substring(0, stockChange.indexOf("%") - 1);
                 double percChange = Double.parseDouble(stockChange);
 
-                if (percChange < 0)
+                if (direction.equals("-"))
                 {
                     stockChange = "("
                         + percChange + ")";
@@ -219,7 +241,7 @@ public class StockAdapter extends ArrayAdapter<Stock>
                 text = new SpannableString(stockChange
                     + "%");
 
-                if (percChange < 0)
+                if (direction.equals("-"))
                 {
                     text.setSpan(new ForegroundColorSpan(Color.RED), 0, text.length(), 0);
                 }
