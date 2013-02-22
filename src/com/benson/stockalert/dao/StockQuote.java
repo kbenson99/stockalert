@@ -1,4 +1,4 @@
-package com.benson.stockalert;
+package com.benson.stockalert.dao;
 
 import java.security.KeyStore;
 
@@ -22,17 +22,18 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.util.Log;
 
+import com.benson.stockalert.R;
 import com.benson.stockalert.utility.MySSLSocketFactory;
 
 
 public class StockQuote
 {
-
     private final String myName       = this.getClass().getSimpleName();
 
     private Context      myContext;
@@ -47,7 +48,6 @@ public class StockQuote
     public StockQuote(Context context)
     {
         this.myContext = context;
-
     }
     
 
@@ -67,20 +67,14 @@ public class StockQuote
         return jsonObject;
     }
 
-    public JSONArray getJsonStockArray(String stock) 
+    public JSONArray getJsonStockArray(String stock) throws JSONException
     {    	
-    	JSONArray localJSONArray = null;
-    	
-        try
-        {
-        	JSONObject jsonObject = null;
-        	jsonObject = this.getJsonObject(stock);
-            localJSONArray = jsonObject.getJSONObject("quotes").getJSONArray("quote");                
-        }
-        catch(Exception ee)
-        {
-        	ee.printStackTrace();        	
-        }       
+    	JSONArray localJSONArray = null;    	
+  
+    	JSONObject jsonObject = null;
+    	jsonObject = this.getJsonObject(stock);
+        localJSONArray = jsonObject.getJSONObject("quotes").getJSONArray("quote");                
+     
         return localJSONArray;
     }
 
@@ -100,7 +94,7 @@ public class StockQuote
         // create a consumer object and configure it with the access
         // token and token secret obtained from the service provider      
         OAuthConsumer consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY,
-                CONSUMER_SECRET);
+                											CONSUMER_SECRET);
     	consumer.setTokenWithSecret(ACCESS_TOKEN, ACCESS_TOKEN_SECRET);        
 
     	JSONObject jsonObject = null;
@@ -122,6 +116,11 @@ public class StockQuote
             Log.i(this.myName, statusCode + ":" + response.getStatusLine().getReasonPhrase());
             
             String jsonString = IOUtils.toString(response.getEntity().getContent());
+            Boolean verbose = Boolean.parseBoolean( this.myContext.getString(R.bool.verbose) );
+            if (verbose)
+            {
+            	Log.i(this.myName, jsonString);
+            }
 
             if (jsonString.length() > 0)
             {
@@ -135,8 +134,10 @@ public class StockQuote
         return jsonObject;   	
     }    
     
-    private HttpClient getNewHttpClient() {
-        try {
+    private HttpClient getNewHttpClient() 
+    {
+        try 
+        {
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
 
@@ -154,7 +155,9 @@ public class StockQuote
             ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
 
             return new DefaultHttpClient(ccm, params);
-        } catch (Exception e) {
+        } 
+        catch (Exception e) 
+        {
             return new DefaultHttpClient();
         }
     }

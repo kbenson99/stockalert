@@ -1,9 +1,5 @@
 import java.util.Calendar;
 
-import org.apache.commons.lang3.StringUtils;
-
-import android.util.Log;
-
 
 public class Check {
 
@@ -11,8 +7,8 @@ public class Check {
 	public static void main( String[] args) {
 		
 		StringBuffer sb = new StringBuffer();
-		sb.append( "t");
-		sb.append( "s");
+		sb.append( 't');
+		sb.append( 's');
 		
 
 		
@@ -30,8 +26,8 @@ public class Check {
 		int hour = cal.get(Calendar.HOUR_OF_DAY);
 
 				
-		System.out.println( "Cal.SATURDAY = " +cal.SATURDAY);
-		System.out.println( "Cal.SUNDAY = " +cal.SUNDAY);
+		System.out.println( "Cal.SATURDAY = " +Calendar.SATURDAY);
+		System.out.println( "Cal.SUNDAY = " +Calendar.SUNDAY);
 		System.out.println( "day = " +day);
 		System.out.println( "hour = " +hour);
 		

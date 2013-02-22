@@ -1,15 +1,12 @@
 package com.benson.stockalert.prefs;
 
-
-import com.benson.stockalert.R;
-import com.benson.stockalert.R.id;
-import com.benson.stockalert.R.layout;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
+
+import com.benson.stockalert.R;
 
 public class ShowSettingsActivity extends Activity {
 

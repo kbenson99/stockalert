@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -23,9 +24,10 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.benson.stockalert.dao.AlertDataSource;
+import com.benson.stockalert.dao.StockQuote;
+import com.benson.stockalert.model.Alert;
 import com.benson.stockalert.utility.Constants;
-import com.benson.stockalert.utility.Stock;
-import com.benson.stockalert.utility.StockDataSource;
 import com.benson.stockalert.utility.StockEntryConverter;
 import com.benson.stockalert.utility.StockEntryParser;
 import com.googlecode.jcsv.reader.CSVReader;
@@ -60,20 +62,27 @@ public class DatabaseCSVTask extends AsyncTask<String, Void, Boolean>
     protected Boolean doInBackground(final String... args)
     {
         this.actionType = args[0];
+        boolean loaded = false;
 
-        if (actionType == Constants.CSV_EXPORT)
+        if (actionType.equals(Constants.CSV_EXPORT))
         {
             return this.export();
         }
         else
         {
-            return this.load();
+        	try
+        	{
+        		loaded = this.load();	
+        	}
+        	catch(JSONException e){}
+            
         }
+        return loaded;
     }
 
-    private boolean load()
+    private boolean load() throws JSONException
     {
-        StockDataSource datasource = null;
+        AlertDataSource datasource = null;
 
         try
         {
@@ -81,39 +90,37 @@ public class DatabaseCSVTask extends AsyncTask<String, Void, Boolean>
                 Constants.STOCK_CSV_NAME));
             Reader csvFile = new InputStreamReader(file);
 
-            CSVReader<Stock> stockReader = new CSVReaderBuilder<Stock>(csvFile).entryParser(
+            CSVReader<Alert> stockReader = new CSVReaderBuilder<Alert>(csvFile).entryParser(
                 new StockEntryParser()).build();
-            List<Stock> stocks = stockReader.readAll();
+            List<Alert> stocks = stockReader.readAll();
 
-            datasource = new StockDataSource(this.myContext);
-            datasource.open();
+            datasource = new AlertDataSource(this.myContext);
 
             datasource.clearStocks();
 
             StockQuote m_stockquote = new StockQuote(this.myContext);
             
-            ArrayList<String> stockArray = new ArrayList<String>();
+            List<String> stockArray = new ArrayList<String>();
             
-            for (Stock mystock : stocks)
+            for (Alert mystock : stocks)
             {
-            	stockArray.add(mystock.getStock());
+            	stockArray.add(mystock.getTicker());
             	
             }
             
             String m_stockString = StringUtils.join(stockArray, ',');
-            JSONObject       localJSONObject    = null;
+            JSONObject localJSONObject    = null;
             JSONArray  localJSONArray = m_stockquote.getJsonStockArray(m_stockString);
 
-            HashMap m_stockMap = new HashMap();	
+
+            Map<String, JSONObject> m_stockMap = new HashMap<String, JSONObject>();	
             for (int i = 0; i < localJSONArray.length(); ++i)
             {
             	try
             	{            		
 	                localJSONObject = localJSONArray.getJSONObject(i);
 	
-	                m_stockMap.put(
-	                    localJSONObject.getString(Constants.JSON_TICKER_KEY),
-	                    localJSONObject);
+	                m_stockMap.put(localJSONObject.getString(Constants.JSON_TICKER_KEY), localJSONObject);
             	}
                 catch (JSONException je)
                 {
@@ -122,15 +129,15 @@ public class DatabaseCSVTask extends AsyncTask<String, Void, Boolean>
                 }                
             }
             
-            for (Stock mystock : stocks)
+            for (Alert mystock : stocks)
             {
-            	if (!m_stockMap.containsKey(mystock.getStock()))
+            	if (!m_stockMap.containsKey(mystock.getTicker()))
             	{
-                	Toast.makeText(this.myContext, mystock.getStock().toString() + " is not a valid stock symbol", Toast.LENGTH_SHORT).show();
+                	Toast.makeText(this.myContext, mystock.getTicker().toString() + " is not a valid stock symbol", Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
-                    datasource.createStock(mystock.getStock(), mystock.getExchange(),
+                    datasource.createStock(mystock.getTicker(), mystock.getExchange(),
                             mystock.getBreakout(), mystock.getAlerted());                     	
                 }           	
             }            
@@ -177,24 +184,24 @@ public class DatabaseCSVTask extends AsyncTask<String, Void, Boolean>
         File file = new File(exportDir, Constants.STOCK_CSV_NAME);
         Log.i(this.myName, file.getAbsolutePath());
 
-        StockDataSource datasource = null;
+        AlertDataSource datasource = null;
 
         try
 
         {
-            datasource = new StockDataSource(this.myContext);
-            datasource.open();
-            ArrayList<Stock> m_stocks = datasource.getAllStocks();
+            datasource = new AlertDataSource(this.myContext);
 
-            List<Stock> stocks = new ArrayList<Stock>();
-            for (Stock mystock : m_stocks)
+            List<Alert> m_stocks = datasource.getAllStocks();
+
+            List<Alert> stocks = new ArrayList<Alert>();
+            for (Alert mystock : m_stocks)
             {
-                stocks.add(new Stock(mystock.getStock(), mystock.getExchange(), mystock
+                stocks.add(new Alert(mystock.getTicker(), mystock.getExchange(), mystock
                     .getBreakout(), mystock.getAlerted()));
             }
 
             FileWriter fwriter = new FileWriter(file);
-            CSVWriter<Stock> csvWriter = new CSVWriterBuilder<Stock>(fwriter).entryConverter(
+            CSVWriter<Alert> csvWriter = new CSVWriterBuilder<Alert>(fwriter).entryConverter(
                 new StockEntryConverter()).build();
             csvWriter.writeAll(stocks);
 

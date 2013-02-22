@@ -1,16 +1,14 @@
 package com.benson.stockalert.service;
 
-import com.benson.stockalert.R;
-import com.benson.stockalert.R.integer;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.benson.stockalert.R;
 
 public class AlertAlarm {
 
@@ -46,7 +44,7 @@ public class AlertAlarm {
 			Intent intent = new Intent(this.myContext, StockBroadcastReceiver.class);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast( this.myContext.getApplicationContext(), 234324243, intent, 0);
 	
-			AlarmManager alarmManager = (AlarmManager) this.myContext.getSystemService(this.myContext.ALARM_SERVICE);
+			AlarmManager alarmManager = (AlarmManager) this.myContext.getSystemService(Context.ALARM_SERVICE);
 			long firstTime = 30000; //30 seconds		
 			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, firstTime, pause, pendingIntent);
 		}
@@ -62,7 +60,7 @@ public class AlertAlarm {
 		Intent intent = new Intent(this.myContext, StockBroadcastReceiver.class);
 		PendingIntent pendingIntent = PendingIntent.getBroadcast( this.myContext.getApplicationContext(), 234324243, intent, 0);
 
-		AlarmManager alarmManager = (AlarmManager) this.myContext.getSystemService(this.myContext.ALARM_SERVICE);
+		AlarmManager alarmManager = (AlarmManager) this.myContext.getSystemService(Context.ALARM_SERVICE);
 		alarmManager.cancel(pendingIntent);
 	}	
 }

@@ -3,6 +3,8 @@ package com.benson.stockalert.service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -19,12 +21,12 @@ import android.os.Vibrator;
 import android.util.Log;
 
 import com.benson.stockalert.R;
-import com.benson.stockalert.StockQuote;
-import com.benson.stockalert.TabDemo;
+import com.benson.stockalert.FinanceTab;
+import com.benson.stockalert.dao.AlertDataSource;
+import com.benson.stockalert.dao.StockQuote;
+import com.benson.stockalert.model.Alert;
 import com.benson.stockalert.utility.Constants;
 import com.benson.stockalert.utility.Network;
-import com.benson.stockalert.utility.Stock;
-import com.benson.stockalert.utility.StockDataSource;
 
 public class StockBroadcastReceiver extends BroadcastReceiver
 {
@@ -84,114 +86,99 @@ public class StockBroadcastReceiver extends BroadcastReceiver
 
     private void handleStocksAlerts()
     {
+    	//we'll try 4 times until giving up
         int cnt = 1;
-        if (!new Network(this.myContext).isOnline())
+
+        while (cnt <= 4)
         {
-            while (cnt <= 4)
+            if (!new Network(this.myContext).isOnline())
             {
-                if (!new Network(this.myContext).isOnline())
+                try
                 {
-                    try
-                    {
-                        Log.i(this.myName,
-                            "No network connection for alert notification.  Try again in 45secs");
-                        new Thread().sleep(45000);
-                    }
-                    catch (InterruptedException ie)
-                    {
-                        // don't care if interrupted
-                    }
-                    cnt++;
+                    Log.i(this.myName, "No network connection for alert notification.  Will try again in 45secs");
+                    Log.i(this.myName, "Number of attempts thus far:  " + cnt);                    
+					Thread.sleep(45000);
                 }
-                else
+                catch (InterruptedException ie)
                 {
-                    Log.i(this.myName, "Got a network connection after "
-                        + cnt + " attempts");
-                    this.checkStocksForAlerts();
-                    cnt = 5;
+                    // don't care if interrupted.  just ignore
                 }
+                cnt++;
             }
-            Log.i(this.myName,
-                "No network connection for alert notification.  Try again at the scheduled time");
+            else
+            {
+                Log.i(this.myName, "Got a network connection after "
+                    + cnt + " attempts");
+                this.checkStocksForAlerts();
+                cnt = 5;
+                continue;
+            }
         }
-        else
-        {
-            this.checkStocksForAlerts();
-        }
+        Log.i(this.myName, "No network connection for alert notification.  Will try again at the scheduled time");
     }
 
     private void checkStocksForAlerts()
     {
-        Log.i(this.myName, "Beginning checking stocks for target breach");
-        HashMap m_stockMap = new HashMap();
+        Log.i(this.myName, "Begin checking stocks for target breach");
+        Map<String, JSONObject> m_stockMap = new HashMap<String, JSONObject>();
         StockQuote m_stockquote = new StockQuote(this.myContext);
-        StockDataSource datasource = new StockDataSource(this.myContext);
+        AlertDataSource datasource = new AlertDataSource(this.myContext);
 
         JSONArray localJSONArray;
         JSONObject localJSONObject = null;
 
-        ArrayList<Stock> mystocks;
+        List<Alert> mystocks;
         try
         {
+            List<String> arrayList = new ArrayList<String>();
 
-            ArrayList arrayList = new ArrayList();
+            NotificationManager notificationManager = (NotificationManager) this.myContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
-            StringBuffer sb = new StringBuffer();
-
-            NotificationManager notificationManager = (NotificationManager) this.myContext
-                .getSystemService(this.myContext.NOTIFICATION_SERVICE);
-
-            datasource.open();
             mystocks = datasource.getAllStocks();
 
             if (mystocks != null
                 && mystocks.size() > 0)
             {
-                for (Stock alertstock : mystocks)
+                for (Alert alertstock : mystocks)
                 {
-                    arrayList.add(alertstock.getStock());
+                    arrayList.add(alertstock.getTicker());
                 }
 
                 if (arrayList.size() > 0)
                 {
-
                     String m_stockString = StringUtils.join(arrayList, ',');
-                    Log.d(this.myName, "m_stockString = "
-                        + m_stockString);
+                    //Log.d(this.myName, "m_stockString = " + m_stockString);
 
                     if (arrayList.size() > 1)
                     {
-                        localJSONArray = m_stockquote.getJsonStockArray(m_stockString);
+                        localJSONArray = m_stockquote.getJsonStockArray(m_stockString);                        
+                        
 
                         for (int i = 0; i < localJSONArray.length(); ++i)
                         {
                             localJSONObject = localJSONArray.getJSONObject(i);
-                            m_stockMap.put(localJSONObject.getString(Constants.JSON_TICKER_KEY),
-                                localJSONObject);
+                            m_stockMap.put(localJSONObject.getString(Constants.JSON_TICKER_KEY), localJSONObject);
                         }
                     }
                     else
                     {
-                        JSONObject json = m_stockquote.getJsonStockObject(m_stockString);
-                        m_stockMap.put(json.getString(Constants.JSON_TICKER_KEY), json);
+                    	localJSONObject = m_stockquote.getJsonStockObject(m_stockString);
+                        m_stockMap.put(localJSONObject.getString(Constants.JSON_TICKER_KEY), localJSONObject);
                     }
-
 
                     // Log.i(this.myName, "m_stockMap length:  " + m_stockMap.size());
 
                     int cnt = 0;
-                    for (Stock stock : mystocks)
+                    for (Alert stock : mystocks)
                     {
-
                         if (stock.getAlerted() == 0)
                         {
 
-                            if (!m_stockMap.containsKey(stock.getStock()))
+                            if (!m_stockMap.containsKey(stock.getTicker()))
                             {
                                 int icon = android.R.drawable.btn_star_big_on;
                                 StringBuffer alertmsg = new StringBuffer();
-                                alertmsg.append("Check the ticker for "
-                                    + stock.getStock());
+                                alertmsg.append("Check the ticker for " + stock.getTicker());
                                 long when = System.currentTimeMillis();
 
                                 Notification notification = new Notification(icon, "", when);
@@ -202,42 +189,37 @@ public class StockBroadcastReceiver extends BroadcastReceiver
                                 // Context context = getApplicationContext();
                                 CharSequence contentTitle = "BAD STOCK DATA";
                                 Intent notificationIntent = new Intent(this.myContext,
-                                    TabDemo.class);
+                                    FinanceTab.class);
                                 PendingIntent contentIntent = PendingIntent.getActivity(
                                     this.myContext, 0, notificationIntent, 0);
                                 notification.setLatestEventInfo(this.myContext, contentTitle,
-                                    alertmsg.toString(), contentIntent);
+                                								alertmsg.toString(), contentIntent);
 
                                 cnt++;
                                 notificationManager.notify(cnt, notification);
 
                                 // Get instance of Vibrator from current Context
-                                Vibrator v = (Vibrator) this.myContext
-                                    .getSystemService(Context.VIBRATOR_SERVICE);
+                                Vibrator v = (Vibrator) this.myContext.getSystemService(Context.VIBRATOR_SERVICE);
 
                                 // Vibrate for 300 milliseconds
                                 v.vibrate(300);
-
                             }
                             else
                             {
-                                localJSONObject = (JSONObject) m_stockMap.get(stock.getStock());
+                                localJSONObject = m_stockMap.get(stock.getTicker());
 
                                 boolean m_stockBrokeout = false;
                                 try
                                 {
-                                    m_stockBrokeout = stock.hasBroken(Double
-                                        .parseDouble(localJSONObject
-                                            .getString(Constants.JSON_PRICE_KEY)));
+                                    m_stockBrokeout = stock.hasBroken(Double.parseDouble(localJSONObject.getString(Constants.JSON_PRICE_KEY)));
                                 }
                                 catch (JSONException je)
                                 {
                                     Log.e(this.myName, "Failed to obtain stock information for "
-                                        + stock.getStock());
+                                        + stock.getTicker());
                                 }
 
-                                if (m_stockBrokeout
-                                    && stock.getAlerted() ==  Constants.STOCK_NOT_ALERTED)
+                                if (m_stockBrokeout && stock.getAlerted() ==  Constants.STOCK_NOT_ALERTED)
                                 {
                                     int icon = android.R.drawable.btn_star_big_on;
                                     StringBuffer alertmsg = new StringBuffer();
@@ -255,9 +237,9 @@ public class StockBroadcastReceiver extends BroadcastReceiver
 
                                     // Context context = getApplicationContext();
                                     CharSequence contentTitle = "Stock Breakout for "
-                                        + stock.getStock();
+                                        + stock.getTicker();
                                     Intent notificationIntent = new Intent(this.myContext,
-                                        TabDemo.class);
+                                        FinanceTab.class);
                                     PendingIntent contentIntent = PendingIntent.getActivity(
                                         this.myContext, 0, notificationIntent, 0);
                                     notification.setLatestEventInfo(this.myContext, contentTitle,
@@ -296,13 +278,11 @@ public class StockBroadcastReceiver extends BroadcastReceiver
                                     datasource.updateStockAlert(stock.getId(), Constants.STOCK_ALERTED);
                                 }
                             }
-
-
                         }
                     }
                 }
             }
-            Log.i(this.myName, "Completed checking stocks for target breach");
+            Log.i(this.myName, "Completed checking stocks for target breakout breach");
         }
         catch (Exception e)
         {

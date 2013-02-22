@@ -30,7 +30,6 @@ import com.benson.stockalert.utility.Stock;
 
 public class StockAdapter extends ArrayAdapter<Stock>
 {
-
     private  HashMap          m_stockMap         = new HashMap();
     public ArrayList<Stock> items;
     private StockQuote       m_stockquote;
@@ -39,14 +38,13 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
     private String           myName;
     private String           m_stockString;
+    
+    private List<String> 	m_stockList = new ArrayList<String>();
 
     DecimalFormat            decimalFormat      = new DecimalFormat("#.##");
     
-    private boolean			 updateInProgress = false;
-
     public StockAdapter(Context context, int textViewResourceId, ArrayList<Stock> items)
     {
-
         super(context, textViewResourceId, items);
 
         this.myName = this.getContext().getClass().getSimpleName();
@@ -55,22 +53,35 @@ public class StockAdapter extends ArrayAdapter<Stock>
         this.items = items;
     }
     
-    private List getStockList()
+    public void setStockList(ArrayList<Stock> m_stocks)
     {
-    	List<String> mylist = new ArrayList<String>();
-    	for (Stock mstock : this.items)
+    	m_stockList.clear();
+    	for (Stock mstock : m_stocks)
     	{
-    		mylist.add( mstock.getStock() );
+    		m_stockList.add( mstock.getStock() );
     	}
-    	return mylist;
     }
     
-    public void setUpdateInProgress(boolean value)
+    public List getStockList()
     {
-    	this.updateInProgress = value;
+    	return m_stockList;
     }
-
-
+    
+    public int getStockCalls()
+    {
+    	return this.m_stockquote.getStockCalls();
+    }
+    
+    public void setStockString()
+    {
+    	m_stockString = StringUtils.join(getStockList(), ',');
+    }
+    
+    public String getStockString()
+    {
+    	return m_stockString;
+    }
+    
     
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
@@ -85,77 +96,60 @@ public class StockAdapter extends ArrayAdapter<Stock>
 
         Stock o = items.get(position);
         
-        if (o != null && this.updateInProgress == false)
+        
+        if (o != null)
         {
-        	Log.i(this.myName, "StockAdapter updating view");
-            TextView ticker = (TextView) v.findViewById(R.id.ticker);
-            TextView lastQuote = (TextView) v.findViewById(R.id.lastQuote);
-            TextView change = (TextView) v.findViewById(R.id.lastChange);
-            TextView changeperc = (TextView) v.findViewById(R.id.ChangePercentage);
-            TextView breakOut = (TextView) v.findViewById(R.id.BreakOut);
-            TextView stockName = (TextView) v.findViewById(R.id.name);
-            TextView breakDistance = (TextView) v.findViewById(R.id.BreakDistance);
+            Log.i(this.myName, "Getting view for " + o.getStock());        	
+            TextView tickerTxtView = (TextView) v.findViewById(R.id.ticker);
+            TextView lastQuoteTxtView = (TextView) v.findViewById(R.id.lastQuote);
+            TextView changeTxtView = (TextView) v.findViewById(R.id.lastChange);
+            TextView changePercentTxtView = (TextView) v.findViewById(R.id.ChangePercentage);
+            TextView breakOutPriceTxtView = (TextView) v.findViewById(R.id.BreakOut);
+            TextView stockNameTxtView = (TextView) v.findViewById(R.id.name);
+            TextView breakDistanceTxtView = (TextView) v.findViewById(R.id.BreakDistance);
 
 //            TextView lowPrice = (TextView) v.findViewById(R.id.lo);
 //            TextView highPrice = (TextView) v.findViewById(R.id.high);
 
             try
             {
-                this.m_stockString = StringUtils.join(getStockList(), ',');
-
 
                 if (getStockList().size() == 1)
                 {
                 	if (localJSONObject == null) 
                 	{
-	                    localJSONObject = this.m_stockquote.getJsonStockObject(this.m_stockString);
-	                    this.m_stockquote.m_stockCalls++;
+	                    localJSONObject = this.m_stockquote.getJsonStockObject(getStockString());
+	                    this.m_stockquote.incrementStockCalls();
                 	}
                 }
                 else
                 {
                     if (localJSONArray == null)
                     {
-                        if (m_stockString.length() == 0)
-                        {
-//                            localJSONArray = this.m_stockquote.getJsonStockArray(o.getStock());
-                            localJSONObject = this.m_stockquote.getJsonStockObject(o.getStock());
-                        }
-                        else
-                        {
-                            localJSONArray = this.m_stockquote.getJsonStockArray(m_stockString);
-                        }
-                        this.m_stockquote.m_stockCalls++;
+                    	localJSONArray = this.m_stockquote.getJsonStockArray(getStockString());
+                        this.m_stockquote.incrementStockCalls();
                     }
 
                     if (localJSONArray != null)
                     {
+                    	JSONObject tempJsonObject = null;
                         if (m_stockMap.size() == 0)
                         {
                             for (int i = 0; i < localJSONArray.length(); ++i)
                             {
-                                localJSONObject = localJSONArray.getJSONObject(i);
+                            	tempJsonObject = localJSONArray.getJSONObject(i);
+                                
+                                if (o.getStock().equals(tempJsonObject.getString(Constants.JSON_TICKER_KEY)))
+                                {
+                                	localJSONObject = tempJsonObject;
+                                }
 
-                                m_stockMap.put(
-                                    localJSONObject.getString(Constants.JSON_TICKER_KEY),
-                                    localJSONObject);
+                                m_stockMap.put(tempJsonObject.getString(Constants.JSON_TICKER_KEY),
+                                				tempJsonObject);
                             }
                         }
                     }
-
-                    if (m_stockMap.containsKey(o.getStock()))
-                    {
-                        localJSONObject = (JSONObject) m_stockMap.get(o.getStock());
-                    }
-                    else
-                    {
-//                        localJSONArray = this.m_stockquote.getJsonStockArray(o.getStock());
-//                        localJSONObject = localJSONArray.getJSONObject(0);
-                        localJSONObject = this.m_stockquote.getJsonStockObject(o.getStock());
-                        this.m_stockquote.m_stockCalls++;
-                    }
                 }
-
             }
             catch (NullPointerException e)
             {
@@ -167,159 +161,112 @@ public class StockAdapter extends ArrayAdapter<Stock>
                 Log.e(this.myName, "Failed to obtain JSONObject for "
                     + o.getStock(), e);
             }
+            
+            int priceMoveDirection = 1;
+            String priceMoveSign = "";
+            boolean m_stockHasBrokenOut = false;
+           
+            tickerTxtView.setText(o.getStock());
 
-            boolean m_stockBrokeout = false;
-
-            double currentPrice = 10000;
+            double currentPrice = 0;
+            
             try
             {
-                currentPrice = Double.parseDouble(localJSONObject
-                    .getString(Constants.JSON_PRICE_KEY));
-                m_stockBrokeout = o.hasBroken(currentPrice);
-            }
-            catch (JSONException je)
-            {
-                Log.e(this.myName, "Failed to obtain stock information for "
-                    + o.getStock());
-            }
-
-            ticker.setText(o.getStock());
-
-            String direction = "";
-            try
-            {
-                lastQuote.setText(direction + localJSONObject.getString(Constants.JSON_PRICE_KEY)); 
+                currentPrice = Double.parseDouble(localJSONObject.getString(Constants.JSON_PRICE_KEY));
+                m_stockHasBrokenOut = o.hasBroken(currentPrice);
+                
                 if (localJSONObject.getString(Constants.JSON_CHANGE_SIGN_KEY).equals("d"))
                 {
-                	direction = "-";
+                	priceMoveDirection = -1;
+                	priceMoveSign = "-";
                 }
                 
-            	              
-            }
-            catch (JSONException je)
-            {
-                Log.e(this.myName, "Failed to obtain current quote for "
-                    + o.getStock());
-            }
-
-            try
-            {
-
-            	String priceChange = localJSONObject.getString(Constants.JSON_CHANGE_KEY);
-                change.setText(direction + localJSONObject.getString(Constants.JSON_CHANGE_KEY));
+                lastQuoteTxtView.setText("" + currentPrice);   
                 
+                changeTxtView.setText(priceMoveSign + localJSONObject.getString(Constants.JSON_CHANGE_KEY));
                 
-//                lowPrice.setText(localJSONObject.getString(Constants.JSON_LO_KEY));
-//                highPrice.setText(localJSONObject.getString(Constants.JSON_HI_KEY));
-            }
-            catch (JSONException je)
-            {
-                Log.e(this.myName, "Failed to obtain last change for "
-                    + o.getStock());
-            }
+//              lowPrice.setText(localJSONObject.getString(Constants.JSON_LO_KEY));
+//              highPrice.setText(localJSONObject.getString(Constants.JSON_HI_KEY));   
+                
 
-            try
-            {
-                SpannableString text;
-
-                String stockChange = localJSONObject
-                    .getString(Constants.JSON_CHANGE_PERCENT_KEY);
+                String stockChange = localJSONObject.getString(Constants.JSON_CHANGE_PERCENT_KEY);
                 stockChange = stockChange.substring(0, stockChange.indexOf("%") - 1);
                 double percChange = Double.parseDouble(stockChange);
 
-                if (direction.equals("-"))
+                if (priceMoveDirection < 0)
                 {
-                    stockChange = "("
-                        + percChange + ")";
+                    stockChange = "(" + percChange + ")";
                 }
                 else
                 {
-                    stockChange = percChange
-                        + "";
+                    stockChange =  "" + percChange;
                 }
 
-                text = new SpannableString(stockChange
-                    + "%");
+                SpannableString spannableText = new SpannableString(stockChange + "%");
 
-                if (direction.equals("-"))
+                if (priceMoveDirection < 0)
                 {
-                    text.setSpan(new ForegroundColorSpan(Color.RED), 0, text.length(), 0);
+                	spannableText.setSpan(new ForegroundColorSpan(Color.RED), 0,spannableText.length(), 0);
                 }
                 else
                 {
-                    text.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), 0);
-                    text.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                        text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    text.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                        text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                	spannableText.setSpan(new ForegroundColorSpan(Color.BLACK), 0, spannableText.length(), 0);
+                	spannableText.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
+                							spannableText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                	spannableText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
+                							spannableText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                changePercentTxtView.setText(spannableText, BufferType.SPANNABLE);  
+                
+                
+                SpannableString disanceSpannableText;
+                double dist = ( (currentPrice - o.getBreakout() ) / o.getBreakout() ) *100;
+
+                disanceSpannableText = new SpannableString(decimalFormat.format(dist) +"%");
+
+                if (dist < 0)
+                {
+                    disanceSpannableText.setSpan(new ForegroundColorSpan(Color.RED), 0, disanceSpannableText.length(), 0);
+                }
+                else
+                {
+                    disanceSpannableText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, disanceSpannableText.length(), 0);
+                    disanceSpannableText.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
+                    							disanceSpannableText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    disanceSpannableText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
+                    							disanceSpannableText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                breakDistanceTxtView.setText(disanceSpannableText, BufferType.SPANNABLE);
+  
+                
+                String stockname = localJSONObject.getString(Constants.JSON_NAME_KEY);
+
+                SpannableString stockNametext;
+
+                if (m_stockHasBrokenOut)
+                {
+                    stockNametext = new SpannableString(stockname);
+
+                    stockNametext.setSpan(new ForegroundColorSpan(Color.GREEN), 0, stockNametext.length(), 0);
+                    stockNametext.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
+                    							stockNametext.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    stockNametext.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
+                    							stockNametext.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+                else
+                {
+                    stockNametext = new SpannableString(stockname);
+                    stockNametext.setSpan(new StrikethroughSpan(), 0, stockNametext.length(), 0);
                 }
 
-                changeperc.setText(text, BufferType.SPANNABLE);
-
+                stockNameTxtView.setText(stockNametext, BufferType.SPANNABLE);
+                
             }
             catch (JSONException je)
             {
-                Log.e(this.myName, "Failed to obtain last change % for "
-                    + o.getStock());
+                Log.e(this.myName, "Failed to obtain current quote for " + o.getStock());
             }
-
-
-            SpannableString disText;
-            double dist = ( (currentPrice - o.getBreakout() ) / o.getBreakout() ) *100;
-
-            disText = new SpannableString( decimalFormat.format(dist) +"%");
-
-            if (dist < 0)
-            {
-                disText.setSpan(new ForegroundColorSpan(Color.RED), 0, disText.length(), 0);
-            }
-            else
-            {
-                disText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, disText.length(), 0);
-                disText.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                    disText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                disText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                    disText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-
-            breakDistance.setText(disText, BufferType.SPANNABLE);
-
-
-            breakOut.setText(decimalFormat.format(o.getBreakout()));
-
-            try
-            {
-                String name = localJSONObject.getString(Constants.JSON_NAME_KEY);
-
-                SpannableString text;
-
-                if (m_stockBrokeout)
-                {
-                    text = new SpannableString(name);
-
-                    text.setSpan(new ForegroundColorSpan(Color.GREEN), 0, text.length(), 0);
-                    text.setSpan(new StyleSpan(android.graphics.Typeface.ITALIC), 0,
-                        text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    text.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
-                        text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-                else
-                {
-                    text = new SpannableString(name);
-                    text.setSpan(new StrikethroughSpan(), 0, text.length(), 0);
-                }
-
-                stockName.setText(text, BufferType.SPANNABLE);
-            }
-            catch (JSONException je)
-            {
-                Log.e(this.myName, "Failed to obtain ticket name for "
-                    + o.getStock());
-            }
-
-        }
-        
-        Log.i(this.myName, "Stock calls:  " +this.m_stockquote.m_stockCalls);
+        }        
         return v;
     }
 }

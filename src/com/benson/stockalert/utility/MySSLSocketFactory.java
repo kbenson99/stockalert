@@ -17,17 +17,22 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 
-public class MySSLSocketFactory extends SSLSocketFactory {
+public class MySSLSocketFactory extends SSLSocketFactory 
+{
     SSLContext sslContext = SSLContext.getInstance("TLS");
 
-    public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+    public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException 
+    {
         super(truststore);
 
-        TrustManager tm = new X509TrustManager() {
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        TrustManager tm = new X509TrustManager() 
+        {
+            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException 
+            {
             }
 
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException 
+            {
             }
 
             public X509Certificate[] getAcceptedIssuers() {

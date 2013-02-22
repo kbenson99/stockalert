@@ -5,14 +5,14 @@
         android:id="@+id/quote_stock"
         android:title="@string/QuoteStock"
         android:icon="@android:drawable/ic_menu_search"
-        />    
-    <item
+        />
+   <item
         android:id="@+id/add_ticker"
         android:title="@string/AddTicker"
         android:icon="@drawable/add"
         />
 	<item
-        android:id="@+id/refresh_alerts"
+        android:id="@+id/refresh_quotes"
         android:title="@string/RefreshAlerts"
         android:icon="@drawable/refresh"
         />
@@ -20,21 +20,21 @@
         android:id="@+id/preferences"
         android:title="Preferences"
         android:icon="@android:drawable/ic_menu_preferences"
-        /> 
+        />   
+	<item
+        android:id="@+id/delete_quote"
+        android:title="@string/Delete"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        />        
+
 	 <item
-        android:id="@+id/export_alerts"
-        android:title="@string/ExportAlerts"
-        android:icon="@android:drawable/ic_menu_save"
+        android:id="@+id/clearquotes"
+        android:title="Clear History"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
         />
 	 <item
-        android:id="@+id/import_alerts"
-        android:title="@string/ImportAlerts"
-        android:icon="@android:drawable/ic_menu_upload"
-        />  
-	 <item
-        android:id="@+id/clear_stocks"
-        android:title="@string/RemoveAll"
-        android:icon="@android:drawable/ic_menu_close_clear_cancel"
-        />               
-	 
+        android:id="@+id/copyquote"
+        android:title="@string/CopyQuote"
+        android:icon="@android:drawable/ic_menu_share"
+        /> 	 	  	 
 </menu>

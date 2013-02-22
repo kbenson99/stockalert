@@ -1,23 +1,21 @@
 package com.benson.stockalert.prefs;
 
-import com.benson.stockalert.R;
-import com.benson.stockalert.R.xml;
-import com.benson.stockalert.service.AlertAlarm;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.benson.stockalert.R;
+import com.benson.stockalert.service.AlertAlarm;
 
-public class AlertPreferences extends PreferenceActivity {
-	
-	private final String myName = this.getClass().getSimpleName();
-	
+
+public class AlertPreferences extends PreferenceActivity 
+{
+		
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

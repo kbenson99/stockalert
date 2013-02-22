@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"    
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:admobsdk="http://schemas.android.com/apk/res/com.pocketools.currency"
  	android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -9,40 +10,30 @@
    		android:layout_width="fill_parent"
    		android:layout_height="wrap_content"
    		android:paddingTop="6.0dip"
-   		android:text="@string/Ticker" />
+   		android:text="Ticker(s):" />
 
 	<EditText
-	   android:id="@+id/add_stock_symbol_directly"
+	   android:id="@+id/stocks_to_quote"
 	   android:layout_width="match_parent"
 	   android:layout_height="wrap_content"
-	   android:singleLine="true" 
-	   android:inputType="textCapCharacters">
+	   android:singleLine="true" >
 	    <requestFocus />
 	</EditText>   
 
-	<TextView
-   		android:layout_width="fill_parent"
-   		android:layout_height="wrap_content"
-   		android:paddingTop="6.0dip"
-   		android:text="@string/BreakOut" />
-
-	<EditText
-	    android:id="@+id/breakout"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        /> 	
-        
+       
 
 
 	<LinearLayout 
 	   android:orientation="horizontal"
 	   android:layout_width="wrap_content"
-	   android:layout_height="wrap_content" >	
+	   android:layout_height="wrap_content" 
+	   android:layout_centerInParent="true"
+	   android:layout_centerVertical="true"
+	   android:layout_centerHorizontal="true">	
 	
             <Button
-                android:id="@+id/add_stock_directly_button"
-                android:text="@string/AddTickerBtn" 
+                android:id="@+id/quote_stock_button"
+                android:text="@string/queryBtn" 
                 android:onClick="onClick"
                 android:paddingTop="6.0dip"
                 android:layout_width="80dp"
@@ -50,7 +41,7 @@
 				/>
             
             <Button
-                android:id="@+id/cancel_stock_directly_button"
+                android:id="@+id/cancel_stock_quote_button"
                 android:text="@string/CancelTickerBtn" 
                 android:onClick="onClick"
                 android:paddingTop="6.0dip"

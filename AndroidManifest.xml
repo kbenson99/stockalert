@@ -3,7 +3,7 @@
     android:installLocation="auto"
     package="com.benson.stockalert"
     android:versionCode="1"
-    android:versionName="1.0.7" >
+    android:versionName="1.1.0" >
 
     <uses-sdk android:minSdkVersion="10" />
 
@@ -29,7 +29,7 @@
         android:label="@string/app_name" >
         
         <activity
-            android:name=".TabDemo"
+            android:name="com.benson.stockalert.FinanceTab"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar"
             android:screenOrientation="portrait" >
@@ -45,7 +45,8 @@
             android:name=".Alerts"
             android:label="@string/Alerts_Page">
         </activity>
-      
+      
+
 		<service
             android:name=".service.AlertService"
             android:process=":remote" >
@@ -53,7 +54,8 @@
                 <action android:name="com.benson.stockalert.service.AlertService" />
             </intent-filter>
         </service>
-		
+		
+
 		<receiver 
 		    android:name=".service.BootReceiverReceiver" >
 		    <intent-filter>
@@ -61,7 +63,8 @@
 		        </action>
 		    </intent-filter>
 		</receiver>
-						<receiver
+				
+		<receiver
 		  android:name=".service.StockBroadcastReceiver"
 		    android:process=":remote" >
 		    <intent-filter>
@@ -70,19 +73,31 @@
 		</receiver>
 				
 		<activity
-            android:name=".Quote"
-            android:label="@string/app_name" >
+            android:name=".dialogs.Quote"
+            android:label="@string/QuoteStock"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
-        
+
+		<activity
+            android:name=".Quotes"
+            android:label="@string/QuoteStock"
+            android:launchMode="singleTop" >
+        </activity>			
+		
+		<activity
+            android:name=".Actives"
+            android:label="@string/AddTicker"
+            android:launchMode="singleTop" >
+        </activity>		
 
         <activity
-            android:name=".AddStock"
+            android:name=".dialogs.AddStock"
             android:label="@string/Add_Page"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         
         <activity
-            android:name=".EditStock"
+            android:name=".dialogs.EditStock"
             android:label="@string/Edit_Page"
             android:theme="@android:style/Theme.Dialog" >
         </activity> 

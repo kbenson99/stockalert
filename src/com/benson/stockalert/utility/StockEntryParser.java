@@ -1,11 +1,12 @@
 package com.benson.stockalert.utility;
 
+import com.benson.stockalert.model.Alert;
 import com.googlecode.jcsv.reader.CSVEntryParser;
 
-public class StockEntryParser implements CSVEntryParser<Stock> {
+public class StockEntryParser implements CSVEntryParser<Alert> {
 	  
 	@Override
-	  public Stock parseEntry(String... data) 
+	  public Alert parseEntry(String... data) 
 		{
 	    if (data.length == 0 || data.length == 1 || data.length > 3) {
 	      throw new IllegalArgumentException("data is not a valid stock record");
@@ -22,7 +23,7 @@ public class StockEntryParser implements CSVEntryParser<Stock> {
 	    }
 
 	                
-	    return new Stock(stock, exchange, breakout, alerted);
+	    return new Alert(stock, exchange, breakout, alerted);
 	  }	
 }
 
