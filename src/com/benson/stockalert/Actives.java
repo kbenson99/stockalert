@@ -1,124 +1,246 @@
 package com.benson.stockalert;
 
-import java.util.Calendar;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.benson.stockalert.R;
 import com.benson.stockalert.dao.ActiveDataSource;
-import com.benson.stockalert.dao.StockQuote;
+import com.benson.stockalert.dao.AlertDataSource;
+import com.benson.stockalert.dao.FinanceDataSource;
+import com.benson.stockalert.dao.QuoteDataSource;
+import com.benson.stockalert.dialogs.AddStock;
+import com.benson.stockalert.dialogs.EditStock;
+import com.benson.stockalert.dialogs.Quote;
+import com.benson.stockalert.model.Alert;
+import com.benson.stockalert.model.Active;
+import com.benson.stockalert.model.QuoteRequest;
+import com.benson.stockalert.model.Stock;
 import com.benson.stockalert.utility.Constants;
+import com.benson.stockalert.view.ActiveAdapter;
+import com.benson.stockalert.view.StockAlertAdapter;
 
-public class Actives extends Activity
+public class Actives extends StockActivity 
 {
-    private final String myName = this.getClass().getSimpleName();
-    
-    private ActiveDataSource datasource;
-    
-    private EditText	m_ticker;
-    private Spinner		m_broker;
-    private EditText	m_quantity;
-    private DatePicker	m_date;
+	protected final String 			myName = this.getClass().getSimpleName();
+	
+	protected static final int		LAYOUT_ID = R.layout.alerts;
+	protected static final int		ADAPTER_LAYOUT_ID = R.layout.stockalertrow;
+	
+	
+	protected static final int		MENU_ID = R.menu.alert_menu;
+	protected static final int		CONTEXT_MENU_ID = R.menu.alerts_context;
+	
+	static final int 				STATIC_ACTIVITY_ADDSTOCK_RESULT = 2; // positive > 0 integer.
+	static final int 				STATIC_ACTIVITY_QUOTE_RESULT = 3; // positive > 0 integer.
 
-    @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_active);
-
-        m_ticker = (EditText) findViewById(R.id.add_stock_symbol_directly);
-        m_broker = (Spinner) findViewById(R.id.spinnerBroker);
-        m_quantity = (EditText) findViewById(R.id.activeQuantity);
-        m_date = (DatePicker) findViewById(R.id.activeDate);
-    }
-    
-    private void initializeDatePicker()
-    {
-		final Calendar c = Calendar.getInstance();
-		int year = c.get(Calendar.YEAR);
-		int month = c.get(Calendar.MONTH);
-		int day = c.get(Calendar.DAY_OF_MONTH);
+	
+	protected void setup()
+	{
+		this.datasource = new ActiveDataSource(this);
 		
-		// set current date into datepicker
-		m_date.init(year, month, day, null);       	
-    }
+        this.m_adapter = new ActiveAdapter(this, this.getAdapterLayoutId(), 
+				new ArrayList<Stock>());
+		
+		setListAdapter(this.m_adapter);
+    }		
+	
 
-    public void onClick(View view)
-    {
+	protected int getLayoutId()
+	{
+		return Actives.LAYOUT_ID;
+	}	
 
-        switch (view.getId())
-        {
-            case R.id.add_stock_directly_button:
-                try
-                {
-                    StockQuote m_stockquote = new StockQuote(this);
-                    datasource = new ActiveDataSource(this);
-//                    Log.d(myName, datasource.getAllStocks()
-//                        + "");
-                    try
-                    {
+	protected int getAdapterLayoutId()
+	{
+		return Actives.ADAPTER_LAYOUT_ID;
+	}
+	
+	protected int getMenuId()
+	{
+		return Actives.MENU_ID;
+	}
+	
+	protected int getContextMenuId()
+	{
+		return Actives.CONTEXT_MENU_ID;
+	}
 
-                        JSONObject jsonObject = m_stockquote.getJsonStockObject(this.m_ticker.getText().toString());
+   @Override
+    public boolean onPrepareOptionsMenu(Menu menu) 
+    {    	
+    	if (m_adapter.m_stockList.size() <= 0)
+    	{
+    		MenuItem item = menu.findItem(R.id.refresh_alerts);
+    		item.setVisible(false); 
+    		
+    		item = menu.findItem(R.id.filtermenu);
+    		item.setVisible(false);
+    	}
+    	else
+    	{
+    		MenuItem item = menu.findItem(R.id.refresh_alerts);
+    		item.setVisible(true);  		
+    		
+    		item = menu.findItem(R.id.filtermenu);
+    		//item.setVisible(true);    		
+    	}
+    	
+    	return super.onPrepareOptionsMenu(menu);
+    } 
+   
 
-                        if (jsonObject.getString(Constants.JSON_EXCHANGE_KEY).equals("null"))
-                        {
-                        	Toast.makeText(Actives.this, this.m_ticker.getText().toString() + " is not a valid stock symbol", Toast.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
-                        	StringBuilder sb=new StringBuilder();
-                        	sb.append(this.m_date.getMonth());
-                        	sb.append('-');
-                        	sb.append(this.m_date.getDayOfMonth());
-                        	sb.append('-');
-                        	sb.append(this.m_date.getYear());
-                        	
-                        	datasource.createActive(
-                        			this.m_ticker.getText().toString(),
-                        			Integer.getInteger(this.m_quantity.getText().toString()),
-                        			String.valueOf(this.m_broker.getSelectedItem()),                        			
-                        			sb.toString());
-                        	
-	                        Log.i(this.myName, "Active ticker "
-	                            + this.m_ticker.getText().toString() + " added to database");
-                        }
-                    }
-                    catch (JSONException je)
-                    {
-                        Log.e(this.myName, "Failed to obtain stock information for "
-                            + this.m_ticker.getText().toString());
-                    }
+	protected boolean applyMenuChoice(MenuItem item) 
+	{
+		switch (item.getItemId()) {
+		case R.id.DeleteStock:
 
-                }
-                finally
-                {
-                    if (datasource != null)
-                    {
-                        datasource.close();
-                    }
-                }
+			this.m_menuSelectedStock = (Alert) this.m_adapter.getItem(position);
 
-//                Intent i = getIntent(); //get the intent that has been called, i.e you did called with startActivityForResult();
-//                setResult(Activity.RESULT_OK, i);  //now you can use Activity.RESULT_OK, its irrelevant whats the resultCode    
-//                                
-//                this.finish();
-//                break;
-            case R.id.cancel_stock_directly_button:
-            {
-                //this.finish();
-                break;
-            }
-        }
-    }
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(
+					"Delete ticker " + this.m_menuSelectedStock.getTicker()
+							+ "?")
+					.setCancelable(false)
+					.setTitle("Confirm Delete")
+					.setIcon(R.drawable.delete)
+					.setPositiveButton("Yes",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									Toast.makeText(
+											getApplicationContext(),
+											"Stock "
+													+ Actives.this.m_menuSelectedStock
+															.getTicker()
+													+ ", ID "
+													+ Actives.this.m_menuSelectedStock
+															.getId()
+													+ " has been deleted",
+											Toast.LENGTH_LONG).show();
+
+									((AlertDataSource) Actives.this.datasource).deleteStock((Alert) Actives.this.m_menuSelectedStock);
+									
+									refresh();
+								}
+							})
+					.setNegativeButton("No",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									dialog.cancel();
+								}
+							});
+			AlertDialog alert = builder.create();
+			alert.show();
+
+			return (true);
+		case R.id.EditStock:
+			this.m_menuSelectedStock = (Alert) this.m_adapter.getItem(position);
+			Intent i = new Intent(this, EditStock.class);
+			i.putExtra(this.getString(R.string.StockKey), this.m_menuSelectedStock);
+			startActivity(i);
+			return (true);
+		case R.id.ViewChart:
+			this.m_menuSelectedStock = (Alert) this.m_adapter.getItem(position);
+			Intent c = new Intent(this, Chart.class);
+			c.putExtra(this.getString(R.string.StockKey), this.m_menuSelectedStock);
+			startActivity(c);
+			return (true);
+		}
+		return false;
+	}
+
+
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	{
+
+		if (requestCode == STATIC_ACTIVITY_ADDSTOCK_RESULT) // check if the request code is the one I sent
+		{
+			if (resultCode == Activity.RESULT_OK) {
+				// now export the stocks being tracked to the stock backup file				
+				new DatabaseCSVTask(this).execute(Constants.CSV_EXPORT);
+
+				this.refresh();
+				Log.i("Stock Alert export", "Export complete");
+			}
+		}
+
+		if (requestCode == STATIC_ACTIVITY_QUOTE_RESULT) // check if the request code is the one I sent
+		{
+			if (resultCode == Activity.RESULT_OK) {
+				String extra = data
+						.getStringExtra(Constants.INTER_ACTIVITY_QUOTE_TAG);
+				Log.i(this.myName, "Quote dialog data:  " + extra);
+
+				FinanceDataSource quoteDatasource = new QuoteDataSource(this);
+				QuoteRequest rq = new QuoteRequest(extra, this.getString(R.string.InvalidWebSites));
+//                Log.i(myName, rq.getQuote().toString());
+				((QuoteDataSource) quoteDatasource).createQuote(rq, Constants.QUOTE_NOT_EXECUTED);
+
+				FinanceTab ft = (FinanceTab) this.getParent();
+				ft.getTab().setCurrentTab(1);
+			}
+		}
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		//Log.i(this.myName, "Item selected: " + item.getItemId());
+		switch (item.getItemId()) 
+		{						
+			case R.id.quote_stock:
+				Intent quote = new Intent(this, Quote.class);
+				startActivityForResult(quote, STATIC_ACTIVITY_QUOTE_RESULT);
+				return true;
+	
+			case R.id.add_ticker:
+				Intent addstock = new Intent(this, AddStock.class);
+				startActivityForResult(addstock, STATIC_ACTIVITY_ADDSTOCK_RESULT);
+				// startActivity(new Intent(this, AddStock.class));
+				return true;
+			case R.id.refresh_alerts:
+				refresh();
+				return true;
+
+			case R.id.export_alerts:
+				new DatabaseCSVTask(this).execute(Constants.CSV_EXPORT);
+				return true;
+			case R.id.import_alerts:
+				new DatabaseCSVTask(this).execute(Constants.CSV_LOAD);
+				refresh();
+				return true;
+			case R.id.clear_stocks:
+				((AlertDataSource) this.datasource).clearStocks();
+				Toast.makeText(Actives.this, "Stock clear complete!",
+						Toast.LENGTH_SHORT).show();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+
+    
+	protected void getData() 
+	{
+		try 
+		{
+			this.m_stocks = ((AlertDataSource) datasource).getAllStocks();
+		} 
+		catch (Exception e) 
+		{
+			Log.e(myName, "Data fetch failed");
+		} 
+		// runOnUiThread(returnRes);
+	}
 }

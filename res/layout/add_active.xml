@@ -32,7 +32,7 @@
             android:layout_width="64dp"
             android:layout_height="wrap_content"
             android:paddingTop="9.0dip"
-            android:text="@string/Quanity"
+            android:text="@string/Quantity"
             android:textColor="@color/blue" />
 
         <EditText
@@ -42,7 +42,27 @@
             android:inputType="number"
             android:singleLine="true" />
 
-    </LinearLayout>  
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="64dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="9.0dip"
+            android:text="@string/BuyPrice"
+            android:textColor="@color/blue" />
+
+        <EditText
+            android:id="@+id/activePrice"
+            android:layout_width="110dp"
+            android:layout_height="60dp"            
+            android:inputType="numberDecimal"
+            android:singleLine="true" />
+
+    </LinearLayout>     
     
   
 

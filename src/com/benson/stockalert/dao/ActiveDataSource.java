@@ -1,13 +1,17 @@
 package com.benson.stockalert.dao;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
+import android.util.Log;
 
 import com.benson.stockalert.model.Active;
+import com.benson.stockalert.model.Quote;
 
 public class ActiveDataSource extends FinanceDataSource 
 {
@@ -75,8 +79,9 @@ public class ActiveDataSource extends FinanceDataSource
 	}	
 	
 
-	public void createActive(String stock, int quantity, String broker, String date) 
+	public void createActive(String stock, int quantity, double buyPrice, String broker, String date) 
 	{	
+		Log.i(this.myName, date);
 		this.openToWrite();		
 		
         InsertHelper ih = new InsertHelper(database, ActiveSQLiteHelper.TABLE_ACTIVES);
@@ -86,6 +91,7 @@ public class ActiveDataSource extends FinanceDataSource
         final int quantityValue = ih.getColumnIndex(ActiveSQLiteHelper.COLUMN_QTY);
         final int brokerValue = ih.getColumnIndex(ActiveSQLiteHelper.COLUMN_BROKER);
         final int dateValue = ih.getColumnIndex(ActiveSQLiteHelper.COLUMN_DATE);
+        final int buyPriceValue = ih.getColumnIndex(ActiveSQLiteHelper.COLUMN_BUY_PRICE);
         
         database.execSQL("PRAGMA synchronous=OFF");
         database.setLockingEnabled(false);
@@ -100,6 +106,7 @@ public class ActiveDataSource extends FinanceDataSource
             ih.bind(quantityValue, quantity);
             ih.bind(brokerValue, broker);
             ih.bind(dateValue, date);
+            ih.bind(buyPriceValue, buyPrice);            
  
             // Insert the row into the database.
             ih.execute();
@@ -136,36 +143,38 @@ public class ActiveDataSource extends FinanceDataSource
 		}
 	}
 
-//	public List<Alert> getAllStocks() {
-//		List<Alert> stocks = new ArrayList<Alert>();
-//		
-//		this.openToRead();
-//		Cursor cursor = null;
-//		try {
-//			cursor = database.query(AlertSQLiteHelper.TABLE_STOCKS,
-//									allColumns, null, null, null, null, null);
-//
-//			cursor.moveToFirst();
-//			while (!cursor.isAfterLast()) 
-//			{
-//				Alert stock = cursorToStock(cursor);
-//				stocks.add(stock);
-//				
-//				cursor.moveToNext();
-//			}		
-//		}
-//		finally {
-//			if (cursor != null)
-//			{
-//				cursor.close();
-//			}
-//			if (database != null)
-//			{
-//				this.close();
-//			}
-//		}
-//		return stocks;
-//	}
+	public List<Active> getActives() {
+		List<Active> stocks = new ArrayList<Active>();
+		
+		Cursor cursor = null;
+		Active active;
+		this.openToRead();
+		try {
+			cursor = database.rawQuery("select * from "
+					+ ActiveSQLiteHelper.TABLE_ACTIVES + " where "
+					+ ActiveSQLiteHelper.COLUMN_ACTIVE + " = 1", null);
+
+			cursor.moveToFirst();
+			while (!cursor.isAfterLast())
+			{
+				active = cursorToActive(cursor);
+				stocks.add(active);
+
+				cursor.moveToNext();
+			}
+		} 
+		finally 
+		{
+			if (cursor != null) {
+				cursor.close();
+			}
+			if (database != null) {
+				this.close();
+			}
+		}
+
+		return stocks;
+	}
 	
 
 
@@ -177,6 +186,7 @@ public class ActiveDataSource extends FinanceDataSource
 		active.setDate(cursor.getString(ActiveSQLiteHelper.COLUMN_DATE_INDEX));
 		active.setActive(cursor.getInt(ActiveSQLiteHelper.COLUMN_ACTIVE_INDEX));
 		active.setQuantity(cursor.getInt(ActiveSQLiteHelper.COLUMN_QTY_INDEX));
+		active.setBuyPrice(cursor.getDouble(ActiveSQLiteHelper.COLUMN_BUY_PRICE_INDEX));
 		return active;
 	}
 }

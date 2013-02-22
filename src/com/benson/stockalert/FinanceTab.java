@@ -8,6 +8,8 @@ import android.os.StrictMode;
 import android.widget.TabHost;
 import android.widget.Toast;
 
+import com.benson.stockalert.dialogs.Actives;
+import com.benson.stockalert.dialogs.Quote;
 import com.benson.stockalert.utility.Constants;
 import com.benson.stockalert.utility.Network;
 
@@ -66,7 +68,7 @@ public class FinanceTab extends TabActivity
 					.setContent(intent);    
 			myHost.addTab(spec);
 			
-			intent = new Intent().setClass(this, Quotes.class);    
+			intent = new Intent().setClass(this, Quote.class);    
 			spec = myHost.newTabSpec("quote").setIndicator("Quotes",                      
 					res.getDrawable(R.drawable.ic_tab_artists))                  
 					.setContent(intent);    		

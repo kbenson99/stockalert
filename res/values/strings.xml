@@ -16,8 +16,9 @@
     <string name="CancelTickerBtn">Cancel</string>
 
     <string name="Ticker">Ticker</string>
-    <string name="Quanity">Quanity</string>
+    <string name="Quantity">Quantity</string>
     <string name="BreakOut">BreakOut</string>
+    <string name="BuyPrice">Price</string>
     
     <string name="AddTicker">Add Ticker</string>
     <string name="CopyQuote">Copy Quote(s)</string>

@@ -13,14 +13,16 @@ public class Active extends Stock implements Serializable{
 	private String broker;
 	private String date;
 	private int active;
+	private double buyPrice;
 
 	public Active(){};
 	
-	public Active(String ticker, int quantity, String broker, String date)
+	public Active(String ticker, int quantity, double buyPrice, String broker, String date)
 	{
 		this.setTicker(ticker);	
 		this.setQuantity(quantity);
 		this.setBroker(broker);
+		this.setBuyPrice(buyPrice);
 		this.setDate(date);
 	}
 
@@ -30,6 +32,14 @@ public class Active extends Stock implements Serializable{
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+
+	public double getBuyPrice() {
+		return buyPrice;
+	}
+
+	public void setBuyPrice(double buyPrice) {
+		this.buyPrice = buyPrice;
 	}
 
 	public String getBroker() {

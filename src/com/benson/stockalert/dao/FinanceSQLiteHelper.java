@@ -11,7 +11,7 @@ public class FinanceSQLiteHelper extends SQLiteOpenHelper
 {	
 	private final String myName = this.getClass().getSimpleName();	
 	
-	private static final int DATABASE_VERSION = 7;
+	private static final int DATABASE_VERSION = 8;
 
 	public FinanceSQLiteHelper(Context context) 
 	{
